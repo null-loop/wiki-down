@@ -1,0 +1,167 @@
+﻿@grayBgColor:#f5f5f5;
+@grayBorderColor:#dddddd;
+
+input:focus,
+select:focus,
+textarea:focus,
+button:focus {
+    outline: none;
+}
+
+#dialogContent {
+    font-family: "Roboto", Helvetica, Arial, sans-serif;
+    h1,h2,h3,h4,h5,h6{
+        margin-top:3px;
+        margin-bottom:3px;
+    }
+}
+
+.ui-dialog-titlebar-close {
+  visibility: hidden;
+}
+
+.ui-dialog-titlebar
+{
+    display:none;
+    color:red;
+    visibility:collapse;
+}
+
+.checkbox-inline
+{
+    padding-left:35px;
+    line-height:22px;
+}
+
+.panel-title{
+    font-size:20px;
+}
+
+input,select{
+    font-family:Ubunto Mono,monospace;
+}
+
+#editorPreview
+{
+    .panel-body{
+        padding:0 8px 8px 8px;
+        background-color:darken(@grayBgColor,1%);
+    }
+    #previewAreaContainer{
+        padding:5px;
+        background-color:darken(@grayBgColor,-5%);
+        margin-bottom:8px;
+        border:1px solid @grayBorderColor;
+        overflow:auto;
+    }
+    .panel{
+        height:100%;
+    }
+
+    pre{
+        font-family:Ubunto Mono,monospace;
+        background-color:darken(@grayBgColor,-5%);
+        padding:0;
+        margin:0;
+        border:none;
+        line-height:1.3em;
+        code{
+            font-family:Ubunto Mono,monospace;
+            background-color:darken(@grayBgColor,-5%);
+            padding:0;
+            margin:0;
+            border:none;
+            line-height:1.3em;
+        }
+    }
+}
+
+.wikiDown{
+    font-family: "Roboto", Helvetica, Arial, sans-serif;
+    h1{
+        font-size:52px;
+    }
+}
+
+#editorInput {
+    
+    .panel-body{
+        padding:0 8px 8px 8px;
+        background-color:darken(@grayBgColor,1%);
+    }
+
+    #textAreaContainer{
+        padding:5px;
+        background-color:darken(@grayBgColor,-5%);
+        margin-bottom:8px;
+        border:1px solid @grayBorderColor;
+    }
+
+    textarea{
+        resize: none; 
+        border:none;
+        width: 100%;
+        -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
+        -moz-box-sizing: border-box;    /* Firefox, other Gecko */
+        box-sizing: border-box;         /* Opera/IE 8+ */
+        padding:0;
+        box-shadow:none;
+        font-family:Ubunto Mono,monospace;
+        background-color:darken(@grayBgColor,-5%);
+        font-size:0.9em;
+        line-height:1.4em;
+    }
+    hr{
+        margin:2px;
+    }
+    .half{
+        width:50%;
+    }
+    .full{
+        width:100%;
+    }
+}
+
+
+#toolbarContent{
+    font-size:0.8em;
+
+}
+
+.inputFont(){
+    font-family:Ubunto Mono,monospace;
+}
+
+input#articleGlobalId{
+    width:250px;
+    .inputFont();
+}
+input#articleTitle{
+    width:250px;
+    .inputFont();
+}
+input#articlePath{
+    width:250px;
+    .inputFont();
+}
+select#parentArticlePath{
+    width:250px;
+    .inputFont();
+}
+label{
+    .inputFont();
+}
+
+#navigationLinks a{
+    padding:3px 10px 3px 10px;
+}
+
+#dialogContent{
+    padding:10px;
+    
+    overflow-x:hidden;
+}
+
+.noedit{
+    color:red;
+}
