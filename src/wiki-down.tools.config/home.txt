@@ -1,0 +1,8 @@
+﻿Welcome to Wiki.Down
+====================
+
+####Bringing the Wiki back down to basics
+
+Everything in Wiki.Down is markdown ([Github flavour](https://help.github.com/articles/github-flavored-markdown/) in particular), so it's super simple to edit.
+
+There's a [markdown example page](article://markdown-example) that can help get you going.
