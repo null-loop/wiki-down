@@ -15,13 +15,13 @@ namespace wiki_down.testing.unit.storage
     public class MySetUpClass
     {
         [SetUp]
-        private void RunBeforeAnyTests()
+        public void RunBeforeAnyTests()
         {
             MongoArticleStore.Init("mongodb://localhost", "unit-test");
         }
 
         [TearDown]
-        private void RunAfterAnyTests()
+        public void RunAfterAnyTests()
         {
             
         }
@@ -89,8 +89,13 @@ namespace wiki_down.testing.unit.storage
             var article = store.GetArticleByPath(idString);
 
             article.Markdown.Content.Should().Be(revisedContent);
+            article.Revision.Should().Be(2);
         }
 
-
+        [Test]
+        public void Delete_And_Recover_Restores_Article_ArticleDrafts_And_History()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

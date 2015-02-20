@@ -25,6 +25,7 @@ namespace wiki_down.core.storage
         public string ActionedBy { get; set; }
 
         public DateTime ActionedOn { get; set; }
+        public int Revision { get; set; }
     }
 
     public enum MongoArticleAction

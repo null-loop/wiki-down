@@ -4,8 +4,7 @@ using MongoDB.Bson;
 
 namespace wiki_down.core.storage
 {
-
-    public class MongoArticleData
+    public class MongoArticleMetaData
     {
         public ObjectId Id { get; set; }
 
@@ -17,6 +16,10 @@ namespace wiki_down.core.storage
 
         public int Revision { get; set; }
 
+    }
+
+    public class MongoExtendedArticleMetaData : MongoArticleMetaData
+    {
         public DateTime RevisedOn { get; set; }
 
         public string RevisedBy { get; set; }
@@ -28,7 +31,10 @@ namespace wiki_down.core.storage
         public bool IsAllowedChildren { get; set; }
 
         public List<string> Keywords { get; set; }
+    }
 
+    public class MongoArticleData : MongoExtendedArticleMetaData
+    {
         public List<MongoArticleContentData> Content { get; set; }
     }
 
@@ -43,5 +49,6 @@ namespace wiki_down.core.storage
         public string TrashedBy { get; set; }
 
         public List<MongoArticleData> ArticleHistory { get; set; }
+        public List<MongoArticleData> Drafts { get; set; }
     }
 }

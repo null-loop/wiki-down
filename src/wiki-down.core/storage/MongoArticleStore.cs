@@ -87,7 +87,7 @@ namespace wiki_down.core.storage
             collection.Insert(articleData);
             historyCollection.Insert(articleData);
 
-            Audit(MongoArticleAction.Create, path, author);
+            Audit(MongoArticleAction.Create, path, 1, author);
 
             var article = MongoArticle.Create(articleData);
 
@@ -111,43 +111,52 @@ namespace wiki_down.core.storage
             return _database.GetCollection<MongoArticleAuditData>(ArticlesCollectionName + "-audit");
         }
 
-        private void Audit(MongoArticleAction action, string path, string actionedBy)
+        private void Audit(MongoArticleAction action, string path, int revision, string actionedBy)
         {
             var audit = new MongoArticleAuditData()
             {
                 Action = action,
                 ActionedBy = actionedBy,
                 Path = path,
-                ActionedOn = DateTime.UtcNow
+                ActionedOn = DateTime.UtcNow,
+                Revision = revision
             };
 
             var collection = GetArticleAuditCollection();
             collection.Insert(audit);
         }
 
-        public void DeleteArticle(string path, string author)
+        public string DeleteArticle(string path, string author)
         {
             // move between collections
             var pathQuery = Query.EQ("Path", path);
             var collection = GetArticleCollection();
             var trashCollection = GetArticleTrashCollection();
             var historyCollection = GetArticleCollection("history");
+            var draftCollection = GetArticleCollection("drafts");
             var articleHistory = historyCollection.Find(pathQuery);
+            var drafts = draftCollection.Find(pathQuery);
             var trashData = new MongoArticleTrashData()
             {
                 ArticleHistory = new List<MongoArticleData>(articleHistory),
-                Path = path,
+                Drafts = new List<MongoArticleData>(drafts),
+                Path = path + "::" + Guid.NewGuid(),
                 TrashedBy = author,
                 TrashedOn = DateTime.UtcNow
             };
 
             trashCollection.Insert(trashData);
 
+            var lastRevision = trashData.ArticleHistory.Max(ah => ah.Revision);
+
             collection.Remove(pathQuery);
             historyCollection.Remove(pathQuery);
-            Audit(MongoArticleAction.Delete, path, author);
+            draftCollection.Remove(pathQuery);
+            Audit(MongoArticleAction.Delete, path, lastRevision, author);
 
             Console.WriteLine("Trashed article at articlePath://" + path + ", " + trashData.ArticleHistory.Count + " revisions");
+
+            return trashData.Path;
         }
 
         private MongoCollection<MongoArticleTrashData> GetArticleTrashCollection()
@@ -162,10 +171,12 @@ namespace wiki_down.core.storage
             var collection = GetArticleCollection();
             var trashCollection = GetArticleTrashCollection();
             var historyCollection = GetArticleCollection("history");
+            var draftCollection = GetArticleCollection("drafts");
 
             var trashData = trashCollection.FindOne(pathQuery);
 
             historyCollection.InsertBatch(trashData.ArticleHistory);
+            draftCollection.InsertBatch(trashData.Drafts);
 
             var maxRevision = trashData.ArticleHistory.Max(ah => ah.Revision);
             var latestRevision = trashData.ArticleHistory.First(ah => ah.Revision == maxRevision);
@@ -173,12 +184,12 @@ namespace wiki_down.core.storage
             collection.Insert(latestRevision);
             trashCollection.Remove(pathQuery);
 
-            Audit(MongoArticleAction.Recover, path, author);
+            Audit(MongoArticleAction.Recover, path, maxRevision, author);
         }
 
 
-        public IArticle ReviseArticle(string path, string title, string markdown, bool? isIndexed, bool? isDraft,
-            bool? isAllowedChildren, string author, int expectedCurrentRevision)
+        public IArticle ReviseArticle(string path, string title, string markdown, bool isIndexed, bool isDraft,
+            bool isAllowedChildren, string author, int expectedCurrentRevision)
         {
             throw new NotImplementedException();
         }
