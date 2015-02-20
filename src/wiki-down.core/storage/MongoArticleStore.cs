@@ -201,6 +201,8 @@ namespace wiki_down.core.storage
             BsonClassMap.RegisterClassMap<MongoArticleAuditData>();
             BsonClassMap.RegisterClassMap<MongoArticleTrashData>();
 
+            //TODO:Map the MongoArticleMetaData & MongoExtendedArticleMetaData types!?
+
             _connectionString = connectionString;
             _dbName = dbName;
         }
