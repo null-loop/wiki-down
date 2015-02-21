@@ -2,7 +2,7 @@
 using System.Web;
 using System.Web.Mvc;
 
-namespace GSIP.Tools.WikiDown.ContentServer.Controllers
+namespace wiki_down.content.server.Controllers
 {
     internal class TransferResult : ActionResult
     {

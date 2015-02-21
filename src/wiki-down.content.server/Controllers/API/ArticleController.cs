@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Web.Http;
+﻿using System.Web.Http;
 
-namespace GSIP.Tools.WikiDown.ContentServer.Controllers.API
+namespace wiki_down.content.server.Controllers.API
 {
     public class ArticleController : ApiController
     {

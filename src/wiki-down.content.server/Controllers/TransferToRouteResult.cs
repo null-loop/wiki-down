@@ -2,7 +2,7 @@
 using System.Web.Mvc;
 using System.Web.Routing;
 
-namespace GSIP.Tools.WikiDown.ContentServer.Controllers
+namespace wiki_down.content.server.Controllers
 {
     public class TransferToRouteResult : ActionResult
     {

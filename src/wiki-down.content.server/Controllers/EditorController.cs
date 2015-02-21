@@ -1,25 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Web.Mvc;
+﻿using System.Web.Mvc;
 
-namespace GSIP.Tools.WikiDown.ContentServer.Controllers
+namespace wiki_down.content.server.Controllers
 {
     public class EditorController : Controller
     {
-        // GET: Editor
-        public ActionResult Index()
+        public ActionResult PageTemplate(string template)
         {
             return View();
         }
 
-        public ActionResult PageTemplate()
-        {
-            return View();
-        }
-
-        public ActionResult ArticleTemplate()
+        public ActionResult ArticleTemplate(string template)
         {
             return View();
         }

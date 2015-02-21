@@ -194,11 +194,11 @@
             //TODO:Instantiate viewmodel
             //TODO:Wire up knockout!
         });
-        $.get(window.wikidown.uri('editor/pagetemplate'), function(content) {
+        $.get(window.wikidown.uri('editor/templates/page'), function(content) {
             var contentDom = $(content);
             editor.pageTemplateDom = contentDom;
         });
-        $.get(window.wikidown.uri('editor/articletemplate'), function(content) {
+        $.get(window.wikidown.uri('editor/templates/article'), function(content) {
             var contentDom = $(content);
             editor.articleTemplateDom = contentDom;
         });

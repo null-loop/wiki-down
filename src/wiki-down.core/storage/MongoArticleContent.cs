@@ -7,7 +7,6 @@ namespace wiki_down.core.storage
         private MongoArticleContent(MongoArticleContentData markdownData)
         {
             _markdownData = markdownData;
-            throw new System.NotImplementedException();
         }
 
         public static IArticleContent Create(MongoArticleContentData markdownData)
