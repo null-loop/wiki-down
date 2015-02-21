@@ -24,6 +24,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Testing", "Testing", "{80F2
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "wiki-down.testing.unit", "wiki-down.testing.unit\wiki-down.testing.unit.csproj", "{665FDAA0-2AC8-40F7-9CA9-983905591A6C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "wiki-down.tools.admin", "wiki-down.tools.admin\wiki-down.tools.admin.csproj", "{D0AD7186-E5E9-4212-A32D-7AE5DE9E2E20}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -46,6 +48,10 @@ Global
 		{665FDAA0-2AC8-40F7-9CA9-983905591A6C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{665FDAA0-2AC8-40F7-9CA9-983905591A6C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{665FDAA0-2AC8-40F7-9CA9-983905591A6C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D0AD7186-E5E9-4212-A32D-7AE5DE9E2E20}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D0AD7186-E5E9-4212-A32D-7AE5DE9E2E20}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D0AD7186-E5E9-4212-A32D-7AE5DE9E2E20}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D0AD7186-E5E9-4212-A32D-7AE5DE9E2E20}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -54,5 +60,6 @@ Global
 		{D8FC19CE-EA15-4E1E-880C-4072BBD49C08} = {09D5A701-38A7-40D3-A7C2-D05200CE9A7C}
 		{8C7BA3ED-1580-444D-9022-60C69DF4B3EF} = {1802C2B0-1667-4626-8E5E-7CE077FAC424}
 		{665FDAA0-2AC8-40F7-9CA9-983905591A6C} = {80F284AC-578C-437C-973B-5C4BDAF80435}
+		{D0AD7186-E5E9-4212-A32D-7AE5DE9E2E20} = {09D5A701-38A7-40D3-A7C2-D05200CE9A7C}
 	EndGlobalSection
 EndGlobal

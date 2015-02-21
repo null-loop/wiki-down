@@ -1,0 +1,48 @@
+﻿<UserControl x:Class="wiki_down.tools.admin.Views.ShellView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             MinWidth="1024" MinHeight="768"
+             d:DesignHeight="768" d:DesignWidth="1024">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Menu Grid.Row="0" Height="32">
+            <MenuItem Header="_Data Stores" Height="32" Width="150">
+                <MenuItem Header="_Create New"></MenuItem>
+                <MenuItem Header="_Connect to Existing"></MenuItem>
+            </MenuItem>
+            <MenuItem Header="[Wiki](//down)" Height="32" Width="150">
+                <MenuItem Header="_Website"></MenuItem>
+                <MenuItem Header="_Donate"></MenuItem>
+            </MenuItem>
+        </Menu>
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition MinWidth="100" Width="1*"></ColumnDefinition>
+                <ColumnDefinition Width="3*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+        </Grid>
+        <StatusBar Grid.Row="2" Height="32" Visibility="{Binding Path=IsProcessing, Converter={StaticResource visibilityConverter}}">
+            <StatusBarItem Width="250" HorizontalAlignment="Left" HorizontalContentAlignment="Center">
+                <TextBlock Text="{Binding Path=CurrentOperation}"/>
+            </StatusBarItem>
+            <StatusBarItem HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"></ColumnDefinition>
+                        <ColumnDefinition Width="Auto"></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
+                    <ProgressBar Grid.Column="0" IsIndeterminate="{Binding Path=IsIndeterminate}" IsEnabled="true" Value="{Binding Path=Completeness}"></ProgressBar>
+                    <Button Margin="4,0,0,0" Visibility="{Binding Path=CanCancel, Converter={StaticResource visibilityConverter}}" Width="150" Grid.Column="1" x:Name="Cancel" Height="26" HorizontalAlignment="Right">Cancel</Button>
+                </Grid>
+            </StatusBarItem>
+            
+        </StatusBar>
+    </Grid>
+</UserControl>
