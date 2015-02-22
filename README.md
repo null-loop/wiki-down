@@ -7,6 +7,7 @@ wiki-down is a markdown based wiki built on .NET and MongoDB.
 ###Features
 
 * One markdown document - many outputs
+* One content store - many websites
 * Markdown renders the same at the client and the server. Editor previews 
 should match the real output!
 * Rendered article content produced before it's requested
@@ -16,7 +17,11 @@ should match the real output!
 
 * ASP.NET Content Server
     * MVC web presentation
-    * WebAPI - read data / edit articles
+        * Site & article navigation
+        * Read-only system monitors
+    * WebAPI 
+        * Read / write articles
+        * Read system data
 * MongoDB database
     * Articles - history, drafts, trash
     * System - logs, audits, configuration
@@ -24,9 +29,18 @@ should match the real output!
     * Manage system configs
     * Monitor system health
 
-### We we're at
+###Milestones
 
-Mid afternoon, day zero. Almost all the layers in are in place, one more decision on locating the
-transformation engine and we're done for 1.0 architecture.
+####0.1 - Article lifecycle
+####0.2 - Article transformations
+####0.3 - Site structure & article templating
 
+**`Current target: 0.1 - Article lifecycle`**
 
+####Done
+
+* Draft article create and revise
+* Publish draft article
+* Trash article
+* Recover trashed article
+* Record article history
