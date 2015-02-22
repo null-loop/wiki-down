@@ -61,7 +61,7 @@ namespace wiki_down.tools.config
             {
 
 
-                MongoArticleStore.Init(connectionString, db);
+                MongoDataStore.Initialise(connectionString, db);
                 if (clean)
                 {
                     var client = new MongoClient(connectionString);
@@ -85,7 +85,12 @@ namespace wiki_down.tools.config
 
         private static void InitDB()
         {
-            var articleStore = new MongoArticleStore();
+            MongoDataStore.SystemAuditStore.Configure();
+            MongoDataStore.SystemConfigurationStore.Configure();
+            MongoDataStore.SystemLoggingStore.Configure();
+
+            var articleStore = MongoDataStore.CreateStore<MongoArticleStore>();
+            articleStore.Configure();
 
             const string wikidownConfigExe = "wiki-down.config.exe";
 
@@ -101,30 +106,9 @@ namespace wiki_down.tools.config
 
             articleStore.CreateDraftArticle("Draft", "Home", "Home.Draft", "A Draft Article", File.ReadAllText("draft.txt"), true, true, Environment.UserName, new[] { "Article", "Content", "Default" }, wikidownConfigExe);
             
-            Console.WriteLine("Created initial articles collection");
+            Console.WriteLine("Created initial articles");
 
-
-            var articles = articleStore.GetArticlesCollection();
-            articles.CreateIndex(new IndexKeysBuilder().Ascending("GlobalId"), IndexOptions.SetUnique(true));
-            articles.CreateIndex(new IndexKeysBuilder().Ascending("Path"), IndexOptions.SetUnique(true));
-            articles.CreateIndex(new IndexKeysBuilder().Ascending("ParentArticlePath"), IndexOptions.SetUnique(false));
-            Console.WriteLine("Created articles indexes");
-
-            var articlesHistory = articleStore.GetArticlesHistoryCollection();
-            articlesHistory.CreateIndex(new IndexKeysBuilder().Ascending("GlobalId"), IndexOptions.SetUnique(false));
-            articlesHistory.CreateIndex(new IndexKeysBuilder().Ascending("Path"), IndexOptions.SetUnique(false));
-            articlesHistory.CreateIndex(new IndexKeysBuilder().Ascending("ParentArticlePath"), IndexOptions.SetUnique(false));
-            Console.WriteLine("Created articles history indexes");
-
-            var articlesTrash = articleStore.GetArticlesTrashCollection();
-            articlesTrash.CreateIndex(new IndexKeysBuilder().Ascending("GlobalId"), IndexOptions.SetUnique(false));
-            articlesTrash.CreateIndex(new IndexKeysBuilder().Ascending("Path"), IndexOptions.SetUnique(false));
-            Console.WriteLine("Created articles trash indexes");
-
-            var articlesDrafts = articleStore.GetArticlesDraftsCollection();
-            articlesDrafts.CreateIndex(new IndexKeysBuilder().Ascending("GlobalId"), IndexOptions.SetUnique(false));
-            articlesDrafts.CreateIndex(new IndexKeysBuilder().Ascending("Path"), IndexOptions.SetUnique(false));
-            Console.WriteLine("Created articles drafts indexes");
+            
         }
 
         private static void CleanDB(MongoDatabase database)

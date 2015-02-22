@@ -4,7 +4,7 @@ using MongoDB.Bson;
 
 namespace wiki_down.core.storage
 {
-    public class MongoArticleMetaData
+    public class MongoArticleMetaData : IMongoData
     {
         public ObjectId Id { get; set; }
 
@@ -16,15 +16,15 @@ namespace wiki_down.core.storage
 
         public int Revision { get; set; }
 
+        public string Title { get; set; }
+
     }
 
     public class MongoExtendedArticleMetaData : MongoArticleMetaData
     {
         public DateTime RevisedOn { get; set; }
 
-        public string RevisedBy { get; set; }
-
-        public string Title { get; set; }
+        public string RevisedBy { get; set; }      
 
         public bool IsIndexed { get; set; }
 
@@ -33,12 +33,33 @@ namespace wiki_down.core.storage
         public List<string> Keywords { get; set; }
     }
 
-    public class MongoArticleData : MongoExtendedArticleMetaData
+    public class MongoArticleData : IMongoData
     {
+        public ObjectId Id { get; set; }
+
+        public string GlobalId { get; set; }
+
+        public string ParentArticlePath { get; set; }
+
+        public string Path { get; set; }
+
+        public int Revision { get; set; }
+
+        public string Title { get; set; }
+
+        public DateTime RevisedOn { get; set; }
+
+        public string RevisedBy { get; set; }
+
+        public bool IsIndexed { get; set; }
+
+        public bool IsAllowedChildren { get; set; }
+
+        public List<string> Keywords { get; set; }
         public List<MongoArticleContentData> Content { get; set; }
     }
 
-    public class MongoArticleTrashData
+    public class MongoArticleTrashData : IMongoData
     {
         public string GlobalId { get; set; }
 
@@ -50,5 +71,7 @@ namespace wiki_down.core.storage
 
         public List<MongoArticleData> ArticleHistory { get; set; }
         public List<MongoArticleData> Drafts { get; set; }
+
+        public ObjectId Id { get; set; }
     }
 }

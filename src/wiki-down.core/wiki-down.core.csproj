@@ -62,11 +62,17 @@
     <Compile Include="MissingDraftException.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RevisionMismatchException.cs" />
+    <Compile Include="storage\AuditAction.cs" />
     <Compile Include="storage\MongoArticle.cs" />
     <Compile Include="storage\MongoArticleContent.cs" />
     <Compile Include="storage\MongoArticleContentData.cs" />
     <Compile Include="storage\MongoArticleMetaData.cs" />
     <Compile Include="storage\MongoArticleStore.cs" />
+    <Compile Include="storage\MongoDataStore.cs" />
+    <Compile Include="storage\MongoStorage.cs" />
+    <Compile Include="storage\MongoSystemAuditStore.cs" />
+    <Compile Include="storage\MongoSystemConfigurationStore.cs" />
+    <Compile Include="storage\MongoSystemLoggingStore.cs" />
     <Compile Include="templates\ArticlePredicateStrategyResolver.cs" />
     <Compile Include="templates\ArticlePredicateTemplateSelectionStrategy.cs" />
     <Compile Include="templates\ITemplateSelectionStrategy.cs" />

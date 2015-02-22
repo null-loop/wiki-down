@@ -19,7 +19,7 @@ namespace wiki_down.content.server
             GlobalConfiguration.Configure(WebApiConfig.Register);
             FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
             RouteConfig.RegisterRoutes(RouteTable.Routes);
-            MongoArticleStore.Init(ConfigurationManager.AppSettings["wikidown.mongodb.connectionString"],
+            MongoDataStore.Initialise(ConfigurationManager.AppSettings["wikidown.mongodb.connectionString"],
                 ConfigurationManager.AppSettings["wikidown.mongodb.dbName"]);
             
         }

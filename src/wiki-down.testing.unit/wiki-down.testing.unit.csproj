@@ -59,6 +59,7 @@
     <Compile Include="Class1.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="storage\MongoArticleStoreTestFixture.cs" />
+    <Compile Include="storage\TestSetup.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

@@ -26,6 +26,14 @@ namespace wiki_down.content.server
             // article/t/p/examples/markdown-examples
             routes.MapRoute(name: "ArticleView.Template.Path", url: "article/t/p/{template}/{path}", defaults: new { controller = "ArticleViewer", action = "ViewArticleByPathWithTemplate" });
 
+            // sys
+
+            // sys/logging
+
+            // sys/audit
+
+            // sys/config
+
             routes.MapRoute(name: "Home", url: "", defaults: new { controller = "Home", action = "Index" });
 
 
