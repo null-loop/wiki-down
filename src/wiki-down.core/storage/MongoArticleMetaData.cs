@@ -26,7 +26,7 @@ namespace wiki_down.core.storage
 
         public string RevisedBy { get; set; }      
 
-        public bool IsIndexed { get; set; }
+        public bool ShowInIndex { get; set; }
 
         public bool IsAllowedChildren { get; set; }
 
@@ -51,7 +51,7 @@ namespace wiki_down.core.storage
 
         public string RevisedBy { get; set; }
 
-        public bool IsIndexed { get; set; }
+        public bool ShowInIndex { get; set; }
 
         public bool IsAllowedChildren { get; set; }
 

@@ -29,7 +29,7 @@ namespace wiki_down.testing.unit.storage
 
             var idString = id.ToString();
 
-            store.CreateDraftArticle(idString, "", idString, "My weird title", idString, true, true, "UnitTesting", new string[0]);
+            store.CreateDraft(idString, "", idString, "My weird title", idString, true, true, "UnitTesting", new string[0]);
             store.PublishDraft(idString, 1, "UnitTesting");
 
             var searchResults = store.SearchArticleTitlesIndex("My");
@@ -71,7 +71,7 @@ namespace wiki_down.testing.unit.storage
 
             var idString = id.ToString();
 
-            store.CreateDraftArticle(idString, "", idString, idString, idString, true, true, "UnitTesting", new string[0]);
+            store.CreateDraft(idString, "", idString, idString, idString, true, true, "UnitTesting", new string[0]);
 
             var mongoQuery = Query.EQ("Path", idString);
 
@@ -93,7 +93,7 @@ namespace wiki_down.testing.unit.storage
             var idString = id.ToString();
             var mongoQuery = Query.EQ("Path", idString);
 
-            store.CreateDraftArticle(idString, "", idString, idString, idString, true, true, "UnitTesting", new string[0]);
+            store.CreateDraft(idString, "", idString, idString, idString, true, true, "UnitTesting", new string[0]);
 
             store.FindDrafts(mongoQuery).Count().Should().Be(1);
             store.Find(mongoQuery).Count().Should().Be(0);
@@ -124,7 +124,7 @@ namespace wiki_down.testing.unit.storage
             var idString = id.ToString();
             var mongoQuery = Query.EQ("Path", idString);
 
-            store.CreateDraftArticle(idString, "", idString, idString, idString, true, true, "UnitTesting", new string[0]);
+            store.CreateDraft(idString, "", idString, idString, idString, true, true, "UnitTesting", new string[0]);
 
             store.FindDrafts(mongoQuery).Count().Should().Be(1);
             store.Find(mongoQuery).Count().Should().Be(0);
@@ -136,7 +136,7 @@ namespace wiki_down.testing.unit.storage
             store.Find(mongoQuery).Count().Should().Be(1);
             store.FindHistory(mongoQuery).Count().Should().Be(1);
 
-            var article = store.GetArticle(idString);
+            var article = store.GetArticleByPath(idString);
 
             article.Markdown.Content.Should().Be(idString);
         }
@@ -150,7 +150,7 @@ namespace wiki_down.testing.unit.storage
             var idString = id.ToString();
             var mongoQuery = Query.EQ("Path", idString);
 
-            store.CreateDraftArticle(idString, "", idString, idString, idString, true, true, "UnitTesting", new string[0]);
+            store.CreateDraft(idString, "", idString, idString, idString, true, true, "UnitTesting", new string[0]);
 
             store.FindDrafts(mongoQuery).Count().Should().Be(1);
             store.Find(mongoQuery).Count().Should().Be(0);
@@ -162,11 +162,11 @@ namespace wiki_down.testing.unit.storage
             store.Find(mongoQuery).Count().Should().Be(1);
             store.FindHistory(mongoQuery).Count().Should().Be(1);
 
-            var article = store.GetArticle(idString);
+            var article = store.GetArticleByPath(idString);
 
             article.Markdown.Content.Should().Be(idString);
 
-            store.CreateDraftArticle(idString, "UnitTesting");
+            store.CreateDraftFromArticle(idString, "UnitTesting");
             store.FindDrafts(mongoQuery).Count().Should().Be(1);
             store.ReviseDraft(idString, "UnitTesting", "NEW CONTENT", true, true, new []{"New","Keywords"},"UnitTesting", 2);
             store.FindDrafts(mongoQuery).Count().Should().Be(1);
@@ -174,7 +174,7 @@ namespace wiki_down.testing.unit.storage
             store.FindDrafts(mongoQuery).Count().Should().Be(0);
             store.FindHistory(mongoQuery).Count().Should().Be(2);
 
-            article = store.GetArticle(idString);
+            article = store.GetArticleByPath(idString);
             article.Markdown.Content.Should().Be("NEW CONTENT");
         }
 
@@ -186,13 +186,13 @@ namespace wiki_down.testing.unit.storage
 
             var idString = id.ToString();
 
-            store.CreateDraftArticle(idString, "", idString, idString, idString, true, true, "UnitTesting", new string[0]);
+            store.CreateDraft(idString, "", idString, idString, idString, true, true, "UnitTesting", new string[0]);
             store.PublishDraft(idString, 1, "UnitTesting");
-            var secondDraft = store.CreateDraftArticle(idString, "UnitTesting");
+            var secondDraft = store.CreateDraftFromArticle(idString, "UnitTesting");
             secondDraft.Revision.Should().Be(2);
             store.ReviseDraft(idString, "UnitTesting", "NEW CONTENT", true, true, new[] { "New", "Keywords" }, "UnitTesting", 2);
             store.PublishDraft(idString, 2, "UnitTesting");
-            var publishedSecond = store.GetArticle(idString);
+            var publishedSecond = store.GetArticleByPath(idString);
             publishedSecond.Revision.Should().Be(2);
         }
     }

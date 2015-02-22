@@ -9,7 +9,7 @@ namespace wiki_down.core.storage
     //TODO:Make use of services - logging
 
 
-    public class MongoArticleStore : MongoStorage<MongoArticleData>
+    public class MongoArticleStore : MongoStorage<MongoArticleData>, IArticleService
     {
         public MongoArticleStore() : base("articles")
         {
@@ -66,12 +66,19 @@ namespace wiki_down.core.storage
             return Query.Matches("Title", "/" + searchTerm + "/");
         }
 
-        public IArticle GetArticleByGlobalId(string globalId, bool draft = false, int revision = -1)
+        public IArticle GetArticleByGlobalId(string globalId)
         {
-            throw new NotImplementedException();
+            var globalIdQuery = Query.EQ("GlobalId", globalId);
+            var articles = GetCollection();
+
+            var article = articles.Find(globalIdQuery).FirstOrDefault();
+
+            if (article == null) throw new MissingArticleException("Cannot find article at article://" + globalId);
+
+            return MongoArticle.Create(article);
         }
 
-        public IArticle GetArticle(string path)
+        public IArticle GetArticleByPath(string path)
         {
             var pathQuery = PathEQ(path);
             var articles = GetCollection();
@@ -83,13 +90,30 @@ namespace wiki_down.core.storage
             return MongoArticle.Create(article);
         }
 
+
+        public bool HasArticleByGlobalId(string globalId)
+        {
+            var globalIdQuery = Query.EQ("GlobalId", globalId);
+            var articles = GetCollection();
+
+            return articles.Find(globalIdQuery).Any();
+        }
+
+        public bool HasArticleByPath(string path)
+        {
+            var pathQuery = PathEQ(path);
+            var articles = GetCollection();
+
+            return articles.Find(pathQuery).Any();
+        }
+
         public IArticleContent GetArticleContent(string path, ArticleContentFormat format, bool draft = false,
             int revision = -1)
         {
             throw new NotImplementedException();
         }
 
-        public int BatchCreateArticle(ArticleBatchCreate[] articles)
+        public string GetArticleContentByGlobalId(string globalId, ArticleContentFormat format)
         {
             throw new NotImplementedException();
         }
@@ -163,7 +187,7 @@ namespace wiki_down.core.storage
                 article.Title = draft.Title;
                 article.Content = draft.Content;
                 article.IsAllowedChildren = draft.IsAllowedChildren;
-                article.IsIndexed = draft.IsIndexed;
+                article.ShowInIndex = draft.ShowInIndex;
                 article.Keywords = draft.Keywords;
 
                 articles.Save(article);
@@ -233,7 +257,7 @@ namespace wiki_down.core.storage
                     Title = draft.Title,
                     Content = draft.Content,
                     IsAllowedChildren = draft.IsAllowedChildren,
-                    IsIndexed = draft.IsIndexed,
+                    ShowInIndex = draft.ShowInIndex,
                     Keywords = draft.Keywords
                 };
 
@@ -272,7 +296,7 @@ namespace wiki_down.core.storage
                 Content = article.Content,
                 Keywords = article.Keywords,
                 IsAllowedChildren = article.IsAllowedChildren,
-                IsIndexed = article.IsIndexed,
+                ShowInIndex = article.ShowInIndex,
                 RevisedBy = article.RevisedBy,
                 Revision = article.Revision,
                 RevisedOn = article.RevisedOn,
@@ -280,7 +304,7 @@ namespace wiki_down.core.storage
             };
         }
 
-        public IArticle CreateDraftArticle(string globalId, string parentArticlePath, string path, string title,
+        public IArticle CreateDraft(string globalId, string parentArticlePath, string path, string title,
             string markdown, bool isIndexed, bool isAllowedChildren, string author, string[] keywords,
             string generator = null, int revision = 1)
         {
@@ -301,7 +325,7 @@ namespace wiki_down.core.storage
             return article;
         }
 
-        public IArticle CreateDraftArticle(string path, string author)
+        public IArticle CreateDraftFromArticle(string path, string author)
         {
             // create a draft from an existing published article
             var pathQuery = PathEQ(path);
@@ -319,8 +343,8 @@ namespace wiki_down.core.storage
 
             var newDraftRevision = article.Revision + 1;
 
-            return CreateDraftArticle(article.GlobalId, article.ParentArticlePath, article.Path, article.Title,
-                contentData == null ? "" : contentData.Content, article.IsIndexed, article.IsAllowedChildren, author,
+            return CreateDraft(article.GlobalId, article.ParentArticlePath, article.Path, article.Title,
+                contentData == null ? "" : contentData.Content, article.ShowInIndex, article.IsAllowedChildren, author,
                 article.Keywords.ToArray(), author, newDraftRevision);
         }
 
@@ -335,7 +359,7 @@ namespace wiki_down.core.storage
                 ParentArticlePath = parentArticlePath,
                 Path = path,
                 Title = title,
-                IsIndexed = isIndexed,
+                ShowInIndex = isIndexed,
                 IsAllowedChildren = isAllowedChildren,
                 RevisedBy = author,
                 RevisedOn = DateTime.UtcNow,
@@ -363,7 +387,6 @@ namespace wiki_down.core.storage
         public bool ArticleHasChildren(string path)
         {
             var parentPathQuery = Query.EQ("ParentArticlePath", path);
-            // do we have children?
             if (GetCollection().Find(parentPathQuery).Any())
             {
                 return true;
@@ -371,7 +394,7 @@ namespace wiki_down.core.storage
             return false;
         }
 
-        public string DeleteArticle(string path, string author)
+        public string TrashArticle(string path, string author)
         {
             // move between collections
             var pathQuery = Query.EQ("Path", path);
@@ -384,8 +407,7 @@ namespace wiki_down.core.storage
             if (ArticleHasChildren(path))
             {
                 // if so we can't delete
-                var message = "Article at articlePath://" + path +
-                              " cannot be deleted as it has child articles";
+                var message = "Article at articlePath://" + path + " cannot be trashed as it has child articles";
                 Error("articles", message);
                 throw new InvalidArticleStateException(message);
             }
@@ -410,8 +432,9 @@ namespace wiki_down.core.storage
             draftCollection.Remove(pathQuery);
             Audit(AuditAction.Delete, path, lastRevision, author);
 
-            Info("articles", "Trashed article at articlePath://" + path + ", " + trashData.ArticleHistory.Count +
-                             " revisions");
+            Info("articles", "Trashed article at articlePath://" + path + ", with " + trashData.ArticleHistory.Count + " revisions");
+
+            //TODO:UNIQUE the path on the trashdata.
 
             return trashData.Path;
         }
@@ -445,6 +468,11 @@ namespace wiki_down.core.storage
 
             Info("articles", "Recovered article at articlePath://" + path + ", " + trashData.ArticleHistory.Count +
                              " revisions");
+        }
+
+        public string GetArticleContentByPath(string path, ArticleContentFormat format)
+        {
+            throw new NotImplementedException();
         }
 
         public IArticle ReviseDraft(string path, string title, string markdown, bool isIndexed,
@@ -483,7 +511,7 @@ namespace wiki_down.core.storage
             contentData.GeneratedOn = DateTime.UtcNow;
             contentData.GeneratedBy = author;
 
-            draft.IsIndexed = isIndexed;
+            draft.ShowInIndex = isIndexed;
             draft.IsAllowedChildren = isAllowedChildren;
             draft.Keywords = new List<string>(keywords);
             drafts.Save(draft);

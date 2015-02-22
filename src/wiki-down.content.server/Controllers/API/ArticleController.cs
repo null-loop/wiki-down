@@ -1,27 +1,47 @@
-﻿using System.Web.Http;
+﻿using System;
+using System.Web.Http;
+using wiki_down.core;
 
 namespace wiki_down.content.server.Controllers.API
 {
     public class ArticleController : ApiController
     {
-        public IHttpActionResult Get(string id)
-        {
-            return Ok(new Article()
-            {
-                Title = "This Is Test Content!",
-                GlobalId = "TestContent",
-                Path = "Home.TestContent",
-                ParentArticlePath = "Home",
+        private readonly IArticleService _articleService;
 
-                AllowChildren = true,
-                Indexed = false,
-                Draft = true,
-                Markdown = "#This is some test content\r\nIt's good isn't it?\r\n##More tea vicar?\r\nI can put whatever I want in here!"
-            });
+        public ArticleController(IArticleService articleService)
+        {
+            _articleService = articleService;
+        }
+
+        public IHttpActionResult GetByGlobalId(string globalId)
+        {
+            if (_articleService.HasArticleByGlobalId(globalId))
+            {
+                var article = _articleService.GetArticleByGlobalId(globalId);
+                return Ok(new ApiArticle()
+                {
+                    Title = article.Title,
+                    GlobalId = article.GlobalId,
+                    Path = article.Path,
+                    ParentArticlePath = article.ParentArticlePath,
+                    AllowChildren = article.IsAllowedChildren,
+                    Indexed = article.ShowInIndex,
+                    Markdown = article.Markdown.Content
+                });
+            }
+            else
+            {
+                return NotFound();
+            }
+        }
+
+        public IHttpActionResult GetByPath(string path)
+        {
+            throw new NotImplementedException();
         }
     }
 
-    public class Article
+    public class ApiArticle
     {
         public string GlobalId { get; set; }
 
@@ -34,8 +54,6 @@ namespace wiki_down.content.server.Controllers.API
         public bool AllowChildren { get; set; }
 
         public bool Indexed { get; set; }
-
-        public bool Draft { get; set; }
 
         public string Markdown { get; set; }
     }

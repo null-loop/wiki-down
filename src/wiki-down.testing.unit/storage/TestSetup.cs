@@ -9,7 +9,7 @@ namespace wiki_down.testing.unit.storage
         [SetUp]
         public void RunBeforeAnyTests()
         {
-            MongoDataStore.Initialise("mongodb://localhost", "unit-test");
+            MongoDataStore.Initialise("mongodb://localhost", "wd-unit-tests");
         }
 
         [TearDown]

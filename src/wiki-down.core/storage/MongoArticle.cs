@@ -53,10 +53,10 @@ namespace wiki_down.core.storage
             set { _data.Title = value; }
         }
 
-        public bool IsIndexed
+        public bool ShowInIndex
         {
-            get { return _data.IsIndexed; }
-            set { _data.IsIndexed = value; }
+            get { return _data.ShowInIndex; }
+            set { _data.ShowInIndex = value; }
         }
 
         public bool IsAllowedChildren

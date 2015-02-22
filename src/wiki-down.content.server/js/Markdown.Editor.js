@@ -139,7 +139,7 @@
     }
 
     function open(contentArticleId) {
-        $.get(window.wikidown.uri('api/article/' + contentArticleId), function(content) {
+        $.get(window.wikidown.uri('api/article/g/' + contentArticleId), function(content) {
             editor.dialogDom.dialog('open');
             editor.article = new articleViewModel(content);
             editor.article.markedupContent.subscribe(function (newValue) {

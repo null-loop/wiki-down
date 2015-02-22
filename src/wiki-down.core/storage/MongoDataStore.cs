@@ -62,7 +62,7 @@ namespace wiki_down.core.storage
         {
             if (_server == null)
             {
-                _server = new MongoClient(_connectionString).GetServer();
+                _server = new MongoClient(_connectionString.StartsWith("mongodb:") ? _connectionString : "mongodb:" + _connectionString).GetServer();
             }
             return _server.GetDatabase(_dbName);
         }
@@ -94,7 +94,7 @@ namespace wiki_down.core.storage
             {
                 cm.MapProperty(emd => emd.RevisedOn);
                 cm.MapProperty(emd => emd.RevisedBy);
-                cm.MapProperty(emd => emd.IsIndexed);
+                cm.MapProperty(emd => emd.ShowInIndex);
                 cm.MapProperty(emd => emd.IsAllowedChildren);
                 cm.MapProperty(emd => emd.Keywords);
             });

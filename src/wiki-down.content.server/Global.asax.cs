@@ -4,7 +4,6 @@ using System.Configuration;
 using System.Web.Http;
 using System.Web.Mvc;
 using System.Web.Routing;
-using wiki_down.core;
 using wiki_down.core.storage;
 
 namespace wiki_down.content.server
@@ -14,14 +13,20 @@ namespace wiki_down.content.server
 
         protected void Application_Start(object sender, EventArgs e)
         {
+
+            StructureMapConfig.Configure();
             TemplatesConfig.Configure();
             AreaRegistration.RegisterAllAreas();
-            GlobalConfiguration.Configure(WebApiConfig.Register);
+            GlobalConfiguration.Configure(config =>
+            {
+                WebApiConfig.Register(config);
+                StructureMapConfig.ConfigureForWebApi(config);
+            });
             FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
             RouteConfig.RegisterRoutes(RouteTable.Routes);
+            StructureMapConfig.ConfigureForMvc();
             MongoDataStore.Initialise(ConfigurationManager.AppSettings["wikidown.mongodb.connectionString"],
                 ConfigurationManager.AppSettings["wikidown.mongodb.dbName"]);
-            
         }
 
         protected void Session_Start(object sender, EventArgs e)
@@ -54,6 +59,4 @@ namespace wiki_down.content.server
 
         }
     }
-
-   
 }

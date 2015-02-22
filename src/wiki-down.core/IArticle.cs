@@ -14,13 +14,34 @@ namespace wiki_down.core
 
     public interface IArticleService
     {
-        IArticle RetrieveArticle(string path);
+        IArticle GetArticleByPath(string path);
 
-        IArticle RetrieveArticleDraft(string path, int revision, string author);
+        IArticle GetArticleByGlobalId(string globalId);
 
-        void TrashArticle(string path);
+        bool HasArticleByGlobalId(string globalId);
 
-        void RecoverArticle(string path);
+        bool HasArticleByPath(string path);
+
+        bool ArticleHasChildren(string path);
+
+        string TrashArticle(string path, string author);
+
+        void RecoverArticle(string path, string author);
+
+        string GetArticleContentByPath(string path, ArticleContentFormat format);
+
+        string GetArticleContentByGlobalId(string globalId, ArticleContentFormat format);
+
+        IArticle GetDraft(string path, string author, int revision);
+
+        IArticle CreateDraft(string globalId, string parentArticlePath, string path, string title,
+            string markdown, bool isIndexed, bool isAllowedChildren, string author, string[] keywords,
+            string generator = null, int revision = 1);
+
+        IArticle CreateDraftFromArticle(string path, string author);
+
+        IArticle ReviseDraft(string path, string title, string markdown, bool isIndexed,
+            bool isAllowedChildren, string[] keywords, string author, int revision);
     }
 
 
