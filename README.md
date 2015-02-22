@@ -2,15 +2,18 @@
 
 ## The wiki that doesn't suck
 
-wiki-down is a markdown based wiki built on .NET and MongoDB. 
+wiki-down is a markdown based wiki built on .NET and MongoDB. There might be some NodeJS - the juries still
+out...
 
 ###Features
 
-* One markdown document - many outputs
-* One content store - many websites
+* One content store - many sites
+* One markdown document - many outputs & formats
 * Markdown renders the same at the client and the server. Editor previews 
 should match the real output!
 * Rendered article content produced before it's requested
+    * Article markdown to article specific formats
+    * Site and article templates integrate article content
 * Auditing and article history
 
 ###System Components
@@ -35,7 +38,7 @@ should match the real output!
 ####0.2 - Article transformations
 ####0.3 - Site structure & article templating
 
-**`Current target: 0.1 - Article lifecycle`**
+#`Current target: 0.1 - Article lifecycle`
 
 ####Done
 
@@ -44,3 +47,14 @@ should match the real output!
 * Trash article
 * Recover trashed article
 * Record article history
+* Writing to system logs
+* Writing to system audit
+
+####TODO
+
+* Article search and retrieval
+* Investigate MongoDB / JS integration vs. NodeJS 'shards' for markdown transformation
+* Efficient article content retrieval
+* Setup main website - running on latest bits
+* Setup sandbox website with auto-cleardown - again on latest bits
+* Investigate Azure package deployment
