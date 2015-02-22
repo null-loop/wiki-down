@@ -17,7 +17,7 @@ using IDependencyResolver = System.Web.Mvc.IDependencyResolver;
 
 namespace wiki_down.content.server
 {
-    public class ControllerRegisrationConvention : IRegistrationConvention
+    public class ControllerRegistrationConvention : IRegistrationConvention
     {
         public void Process(Type type, Registry registry)
         {
@@ -41,7 +41,7 @@ namespace wiki_down.content.server
                 {
                     y.TheCallingAssembly();
                     y.WithDefaultConventions();
-                    y.With(new ControllerRegisrationConvention());
+                    y.With(new ControllerRegistrationConvention());
                     y.AddAllTypesOf<Controller>();
                     y.AddAllTypesOf<ApiController>();
                 });
@@ -75,8 +75,7 @@ namespace wiki_down.content.server
         public IHttpController Create(HttpRequestMessage request
             , HttpControllerDescriptor controllerDescriptor, Type controllerType)
         {
-            var controller =  DependencyResolver.Current.GetService(controllerType) as IHttpController;
-            return controller;
+            return DependencyResolver.Current.GetService(controllerType) as IHttpController;
         }
     }
 
