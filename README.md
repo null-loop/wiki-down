@@ -38,7 +38,7 @@ should match the real output!
 ####0.2 - Article transformations
 ####0.3 - Site structure & article templating
 
-#`Current target: 0.1 - Article lifecycle`
+###`Current target: 0.1 - Article lifecycle`
 
 ####Done
 
