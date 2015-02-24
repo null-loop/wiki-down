@@ -34,9 +34,12 @@ should match the real output!
 
 ###Milestones
 
-####0.1 - Article lifecycle
+####0.1 - Article lifecycle & ancillary services
 ####0.2 - Article transformations
 ####0.3 - Site structure & article templating
+####0.4 - User management, authentication, and authorisation
+####0.5 - Article & configuration security attributes
+####0.6 - Admin console & system monitors
 
 ###`Current target: 0.1 - Article lifecycle`
 
@@ -49,6 +52,7 @@ should match the real output!
 * Record article history
 * Writing to system logs
 * Writing to system audit
+* Working (but a bit hacky) MongoDB / JS markdown transformation
 
 ####TODO
 
