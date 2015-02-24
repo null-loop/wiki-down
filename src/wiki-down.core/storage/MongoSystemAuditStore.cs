@@ -22,7 +22,7 @@ namespace wiki_down.core.storage
             });
         }
 
-        public override void Configure()
+        public override void InitialiseDatabase()
         {
             var collection = GetCollection();
 

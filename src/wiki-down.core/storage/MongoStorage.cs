@@ -54,7 +54,7 @@ namespace wiki_down.core.storage
             get {  return _collectionNameRoot;}
         }
 
-        public virtual void Configure()
+        public virtual void InitialiseDatabase()
         {
             // perform any config on datastore init
         }

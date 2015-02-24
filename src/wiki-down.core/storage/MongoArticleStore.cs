@@ -19,7 +19,7 @@ namespace wiki_down.core.storage
             RequiresDrafts = true;
         }
 
-        public override void Configure()
+        public override void InitialiseDatabase()
         {
             var collection = GetCollection();
             collection.CreateIndex(new IndexKeysBuilder().Ascending("GlobalId"), IndexOptions.SetUnique(true));

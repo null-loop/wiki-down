@@ -1,6 +1,7 @@
 using System;
 using MongoDB.Bson;
 using MongoDB.Driver;
+using MongoDB.Driver.Builders;
 
 namespace wiki_down.core.storage
 {
@@ -32,6 +33,12 @@ namespace wiki_down.core.storage
         public IArticleContent GetGeneratedArticleCotent(string path, ArticleContentFormat format)
         {
             throw new NotImplementedException();
+        }
+
+        public override void InitialiseDatabase()
+        {
+            var collection = GetCollection();
+            collection.CreateIndex(new IndexKeysBuilder().Ascending("ArticlePath").Ascending("Format"), IndexOptions.SetUnique(true));
         }
     }
 }

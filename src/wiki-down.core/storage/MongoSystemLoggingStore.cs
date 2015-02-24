@@ -10,7 +10,7 @@ namespace wiki_down.core.storage
         {
         }
 
-        public override void Configure()
+        public override void InitialiseDatabase()
         {
             //TODO:Get the max size from config
             Database.CreateCollection(CollectionNameRoot, CollectionOptions

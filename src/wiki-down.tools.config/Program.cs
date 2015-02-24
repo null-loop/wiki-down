@@ -77,12 +77,22 @@ namespace wiki_down.tools.config
 
         private static void InitDB()
         {
-            MongoDataStore.SystemAuditStore.Configure();
-            MongoDataStore.SystemConfigurationStore.Configure();
-            MongoDataStore.SystemLoggingStore.Configure();
+            MongoDataStore.SystemAuditStore.InitialiseDatabase();
+            MongoDataStore.SystemConfigurationStore.InitialiseDatabase();
+            MongoDataStore.SystemLoggingStore.InitialiseDatabase();
+
+            var javascriptStore = MongoDataStore.CreateStore<MongoJavascriptFunctionStore>();
+
+            javascriptStore.InitialiseDatabase();
+            javascriptStore.StoreFunction("markdown_to_html", File.ReadAllText("javascript/marked.js"));
+            javascriptStore.StoreFunction("generate_all_article_content", File.ReadAllText("javascript/generate_all_article_content.js"));
+            javascriptStore.StoreFunction("generate_article_content", File.ReadAllText("javascript/generate_article_content.js"));
+
+            var generatedStore = MongoDataStore.CreateStore<MongoGeneratedArticleContentStore>();
+            generatedStore.InitialiseDatabase();
 
             var articleStore = MongoDataStore.CreateStore<MongoArticleStore>();
-            articleStore.Configure();
+            articleStore.InitialiseDatabase();
 
             const string wikidownConfigExe = "wiki-down.config.exe";
 
@@ -100,11 +110,7 @@ namespace wiki_down.tools.config
             
             Console.WriteLine("Created initial articles");
 
-            var javascriptStore = MongoDataStore.CreateStore<MongoJavascriptFunctionStore>();
 
-            javascriptStore.StoreFunction("markdown_to_html", File.ReadAllText("javascript/marked.js"));
-            javascriptStore.StoreFunction("generate_all_article_content", File.ReadAllText("javascript/generate_all_article_content.js"));
-            javascriptStore.StoreFunction("generate_article_content", File.ReadAllText("javascript/generate_article_content.js"));
         }
 
         private static void CleanDB(MongoDatabase database)
