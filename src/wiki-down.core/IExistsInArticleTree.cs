@@ -13,5 +13,6 @@ namespace wiki_down.core
 
         string Path { get; }
 
+        bool IsAllowedChildren { get; set; }
     }
 }

@@ -1,5 +1,4 @@
 using System;
-using MongoDB.Bson;
 using MongoDB.Driver.Builders;
 
 namespace wiki_down.core.storage
@@ -31,22 +30,5 @@ namespace wiki_down.core.storage
             collection.CreateIndex(new IndexKeysBuilder().Descending("Path"), IndexOptions.SetUnique(false));
             collection.CreateIndex(new IndexKeysBuilder().Descending("Area"), IndexOptions.SetUnique(false));
         }
-    }
-
-    public class MongoSystemAuditEventData : IMongoData
-    {
-        public ObjectId Id { get; set; }
-
-        public string Area { get; set; }
-
-        public AuditAction Action { get; set; }
-
-        public string Path { get; set; }
-
-        public string ActionedBy { get; set; }
-
-        public DateTime ActionedOn { get; set; }
-
-        public int Revision { get; set; }
     }
 }

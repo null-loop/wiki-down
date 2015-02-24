@@ -1,5 +1,3 @@
-using MongoDB.Bson;
-
 namespace wiki_down.core.storage
 {
     public class MongoSystemConfigurationStore : MongoStorage<MongoConfigurationArticleData>, ISystemConfigurationService
@@ -9,10 +7,5 @@ namespace wiki_down.core.storage
             RequiresHistory = true;
             RequiresAudit = true;
         }
-    }
-
-    public class MongoConfigurationArticleData : IMongoData
-    {
-        public ObjectId Id { get; set; }
     }
 }

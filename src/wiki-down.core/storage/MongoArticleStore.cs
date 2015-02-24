@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using MongoDB.Driver.Builders;
 
@@ -185,7 +186,7 @@ namespace wiki_down.core.storage
                 article.RevisedOn = DateTime.UtcNow;
                 article.RevisedBy = author;
                 article.Title = draft.Title;
-                article.Content = draft.Content;
+                article.Markdown = draft.Markdown;
                 article.IsAllowedChildren = draft.IsAllowedChildren;
                 article.ShowInIndex = draft.ShowInIndex;
                 article.Keywords = draft.Keywords;
@@ -195,8 +196,9 @@ namespace wiki_down.core.storage
                 drafts.Remove(pathRevisionAndAuthorQuery);
                 Audit(AuditAction.Publish, article.Path, article.Revision, publisher ?? author);
 
-
                 Info("articles", "Published draft article at articlePath://" + article.Path + ", article://" + article.GlobalId + " to revision " + article.Revision);
+
+                GenerateArticleContent(article.Path);
             }
             else
             {
@@ -255,7 +257,7 @@ namespace wiki_down.core.storage
                     RevisedOn = DateTime.UtcNow,
                     RevisedBy = author,
                     Title = draft.Title,
-                    Content = draft.Content,
+                    Markdown = draft.Markdown,
                     IsAllowedChildren = draft.IsAllowedChildren,
                     ShowInIndex = draft.ShowInIndex,
                     Keywords = draft.Keywords
@@ -268,7 +270,14 @@ namespace wiki_down.core.storage
 
                 Info("articles", "Published draft article at articlePath://" + article.Path + ", article://" +
                                  article.GlobalId + " to revision " + article.Revision);
+
+                GenerateArticleContent(article.Path);
             }
+        }
+
+        private void GenerateArticleContent(string path)
+        {
+            MongoGeneratedArticleContentStore.RunGenerate(path, Database);
         }
 
         private static IMongoQuery RevisedByEQ(string author)
@@ -293,7 +302,7 @@ namespace wiki_down.core.storage
                 GlobalId = article.GlobalId,
                 Path = article.Path,
                 ParentArticlePath = article.ParentArticlePath,
-                Content = article.Content,
+                Markdown = article.Markdown,
                 Keywords = article.Keywords,
                 IsAllowedChildren = article.IsAllowedChildren,
                 ShowInIndex = article.ShowInIndex,
@@ -339,12 +348,10 @@ namespace wiki_down.core.storage
                 Error("articles", message);
                 throw new MissingArticleException(message);
             }
-            var contentData = article.Content.FirstOrDefault(c => c.Format == ArticleContentFormat.Markdown);
-
             var newDraftRevision = article.Revision + 1;
 
             return CreateDraft(article.GlobalId, article.ParentArticlePath, article.Path, article.Title,
-                contentData == null ? "" : contentData.Content, article.ShowInIndex, article.IsAllowedChildren, author,
+                article.Markdown, article.ShowInIndex, article.IsAllowedChildren, author,
                 article.Keywords.ToArray(), author, newDraftRevision);
         }
 
@@ -365,16 +372,7 @@ namespace wiki_down.core.storage
                 RevisedOn = DateTime.UtcNow,
                 Revision = revision,
                 Keywords = new List<string>(keywords),
-                Content = new List<MongoArticleContentData>
-                {
-                    new MongoArticleContentData
-                    {
-                        Format = ArticleContentFormat.Markdown,
-                        Content = markdown,
-                        GeneratedBy = generator,
-                        GeneratedOn = DateTime.UtcNow
-                    }
-                }
+                Markdown = markdown
             };
             return articleData;
         }
@@ -402,6 +400,7 @@ namespace wiki_down.core.storage
             var trashCollection = GetTrashCollection();
             var historyCollection = GetHistoryCollection();
             var draftCollection = GetDraftsCollection();
+            var generatedCollection = GetCollection<MongoGeneratedArticleContentData>("generated");
 
             // do we have children?
             if (ArticleHasChildren(path))
@@ -430,6 +429,7 @@ namespace wiki_down.core.storage
             collection.Remove(pathQuery);
             historyCollection.Remove(pathQuery);
             draftCollection.Remove(pathQuery);
+            generatedCollection.Remove(pathQuery);
             Audit(AuditAction.Delete, path, lastRevision, author);
 
             Info("articles", "Trashed article at articlePath://" + path + ", with " + trashData.ArticleHistory.Count + " revisions");
@@ -464,6 +464,8 @@ namespace wiki_down.core.storage
             collection.Insert(latestRevision);
             trashCollection.Remove(pathQuery);
 
+            GenerateArticleContent(path);
+
             Audit(AuditAction.Recover, path, maxRevision, author);
 
             Info("articles", "Recovered article at articlePath://" + path + ", " + trashData.ArticleHistory.Count +
@@ -495,22 +497,7 @@ namespace wiki_down.core.storage
             }
 
             draft.Title = title;
-            var contentData = draft.Content.FirstOrDefault(c => c.Format == ArticleContentFormat.Markdown);
-
-            if (contentData == null)
-            {
-                contentData = new MongoArticleContentData
-                {
-                    Format = ArticleContentFormat.Markdown
-                };
-                draft.Content.Add(contentData);
-                Warn("articles", "Adding missing content data for " + draft.Id);
-            }
-
-            contentData.Content = markdown;
-            contentData.GeneratedOn = DateTime.UtcNow;
-            contentData.GeneratedBy = author;
-
+            draft.Markdown = markdown;
             draft.ShowInIndex = isIndexed;
             draft.IsAllowedChildren = isAllowedChildren;
             draft.Keywords = new List<string>(keywords);
@@ -524,9 +511,5 @@ namespace wiki_down.core.storage
 
             return MongoArticle.Create(draft);
         }
-    }
-
-    public class ArticleBatchCreate
-    {
     }
 }

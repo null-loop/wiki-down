@@ -26,7 +26,7 @@ namespace wiki_down.content.server.Controllers.API
                     ParentArticlePath = article.ParentArticlePath,
                     AllowChildren = article.IsAllowedChildren,
                     Indexed = article.ShowInIndex,
-                    Markdown = article.Markdown.Content
+                    Markdown = article.Markdown
                 });
             }
             else

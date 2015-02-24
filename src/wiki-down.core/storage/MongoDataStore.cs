@@ -70,7 +70,7 @@ namespace wiki_down.core.storage
         public static void Initialise(string connectionString, string dbName)
         {
             BsonClassMap.RegisterClassMap<MongoArticleData>();
-            BsonClassMap.RegisterClassMap<MongoArticleContentData>(cm =>
+            BsonClassMap.RegisterClassMap<MongoGeneratedArticleContentData>(cm =>
             {
                 cm.AutoMap();
                 cm.GetMemberMap(c => c.Format).SetRepresentation(BsonType.String);
@@ -102,6 +102,11 @@ namespace wiki_down.core.storage
             {
                 cm.AutoMap();
                 cm.GetMemberMap(c => c.Level).SetRepresentation(BsonType.String);
+            });
+            BsonClassMap.RegisterClassMap<MongoJavascriptFunctionData>(cm =>
+            {
+                cm.MapIdProperty(c => c.Id);
+                cm.MapProperty(c => c.Value).SetElementName("value");
             });
 
             _connectionString = connectionString;

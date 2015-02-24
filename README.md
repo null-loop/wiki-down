@@ -1,4 +1,4 @@
-# \[wiki\]\(//down\)
+# **\[wiki\]**\(//down\)
 
 ## The wiki that doesn't suck
 
@@ -52,9 +52,10 @@ should match the real output!
 
 ####TODO
 
-* Article search and retrieval
 * Investigate MongoDB / JS integration vs. NodeJS 'shards' for markdown transformation
-* Efficient article content retrieval
+* Efficient generated article content retrieval
+* Editor / API integration
+* Article search and retrieval
 * Setup main website - running on latest bits
 * Setup sandbox website with auto-cleardown - again on latest bits
 * Investigate Azure package deployment

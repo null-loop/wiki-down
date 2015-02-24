@@ -39,7 +39,7 @@ namespace wiki_down.content.server
             {
                 ce.Scan(y =>
                 {
-                    y.TheCallingAssembly();
+                    y.AssembliesFromApplicationBaseDirectory();
                     y.WithDefaultConventions();
                     y.With(new ControllerRegistrationConvention());
                     y.AddAllTypesOf<Controller>();
@@ -51,6 +51,8 @@ namespace wiki_down.content.server
                 ce.For<ISystemConfigurationService>().Use(() => MongoDataStore.SystemConfigurationStore);
 
                 ce.For<IArticleService>().Use(() => MongoDataStore.CreateStore<MongoArticleStore>());
+                ce.For<IJavascriptFunctionService>().Use(() => MongoDataStore.CreateStore<MongoJavascriptFunctionStore>());
+                ce.For<IGeneratedArticleContentService>().Use(() => MongoDataStore.CreateStore<MongoGeneratedArticleContentStore>());
             });
         }
 

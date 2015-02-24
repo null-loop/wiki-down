@@ -74,30 +74,10 @@ namespace wiki_down.core.storage
             get { return _data.Keywords; }
         }
 
-        public IArticleContent Markdown
+        public string Markdown
         {
-            get
-            {
-                if (!_contentMap.ContainsKey(ArticleContentFormat.Markdown))
-                {
-                    var markdownData = GetContent(ArticleContentFormat.Markdown);
-                    if (markdownData==null) throw new InvalidOperationException("Missing markdown data!");
-                    _contentMap[ArticleContentFormat.Markdown] = MongoArticleContent.Create(markdownData);
-                }
-                return _contentMap[ArticleContentFormat.Markdown];
-            }
+            get { return _data.Markdown; }
         }
 
-        private MongoArticleContentData GetContent(ArticleContentFormat articleContentFormat)
-        {
-            return _data.Content.FirstOrDefault(f => f.Format == articleContentFormat);
-        }
-
-        public string GetArticleContent(ArticleContentFormat format)
-        {
-            if (format == ArticleContentFormat.Markdown) return Markdown.Content;
-            var data = GetContent(format);
-            return data == null ? null : data.Content;
-        }
     }
 }

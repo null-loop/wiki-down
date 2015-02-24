@@ -16,6 +16,8 @@ namespace wiki_down.content.server
             routes.MapRoute(name: "Editor.PageTemplate", url: "editor/templates/page/{template}", defaults: new { controller = "Editor", action = "PageTemplate", template = defaultTemplate });
             // editor/templates/article/homepage
             routes.MapRoute(name: "Editor.ArticleTemplate", url: "editor/templates/article/{template}", defaults: new { controller = "Editor", action = "ArticleTemplate", template = defaultTemplate });
+            // editor/javascript/wikidown_markdown_to_html
+            routes.MapRoute(name: "Editor.StoredJavascriptFunction", url: "editor/javascript/{functionName}", defaults: new { controller = "Editor", action = "StoredJavascriptFunction"});
 
             // article/g/markdown-examples
             routes.MapRoute(name: "ArticleView.GlobalId", url: "article/g/{globalId}", defaults: new { controller = "ArticleViewer", action = "ViewArticleByGlobalId" });

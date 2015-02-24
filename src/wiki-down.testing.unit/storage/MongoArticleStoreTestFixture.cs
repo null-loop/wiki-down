@@ -109,7 +109,7 @@ namespace wiki_down.testing.unit.storage
 
             var article = store.GetDraft(idString, "UnitTesting", 1);
 
-            article.Markdown.Content.Should().Be(revisedContent);
+            article.Markdown.Should().Be(revisedContent);
             article.Revision.Should().Be(1);
         }
 
@@ -138,7 +138,7 @@ namespace wiki_down.testing.unit.storage
 
             var article = store.GetArticleByPath(idString);
 
-            article.Markdown.Content.Should().Be(idString);
+            article.Markdown.Should().Be(idString);
         }
 
         [Test]
@@ -164,7 +164,7 @@ namespace wiki_down.testing.unit.storage
 
             var article = store.GetArticleByPath(idString);
 
-            article.Markdown.Content.Should().Be(idString);
+            article.Markdown.Should().Be(idString);
 
             store.CreateDraftFromArticle(idString, "UnitTesting");
             store.FindDrafts(mongoQuery).Count().Should().Be(1);
@@ -175,7 +175,7 @@ namespace wiki_down.testing.unit.storage
             store.FindHistory(mongoQuery).Count().Should().Be(2);
 
             article = store.GetArticleByPath(idString);
-            article.Markdown.Content.Should().Be("NEW CONTENT");
+            article.Markdown.Should().Be("NEW CONTENT");
         }
 
         [Test]

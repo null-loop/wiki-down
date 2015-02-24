@@ -1,17 +1,9 @@
-using System;
 using System.Collections.Generic;
 using System.Reflection;
-using System.Runtime.Serialization;
-using MongoDB.Bson;
 using MongoDB.Driver;
 
 namespace wiki_down.core.storage
 {
-    public interface IMongoData
-    {
-        ObjectId Id { get; set; }
-    }
-
     public abstract class MongoStorage
     {
         private MongoDatabase _database;
@@ -42,7 +34,8 @@ namespace wiki_down.core.storage
             SystemLoggingService = systemLoggingService;
         }
 
-        protected MongoCollection<T> GetCollection<T>(string collectionName)
+
+        protected MongoCollection<T> GetCollection<T>(string collectionName = null)
         {
             if (string.IsNullOrEmpty(collectionName))
             {
@@ -64,35 +57,6 @@ namespace wiki_down.core.storage
         public virtual void Configure()
         {
             // perform any config on datastore init
-        }
-    }
-
-    [Serializable]
-    public class CollectionUnavailableException : Exception
-    {
-        //
-        // For guidelines regarding the creation of new exception types, see
-        //    http://msdn.microsoft.com/library/default.asp?url=/library/en-us/cpgenref/html/cpconerrorraisinghandlingguidelines.asp
-        // and
-        //    http://msdn.microsoft.com/library/default.asp?url=/library/en-us/dncscol/html/csharp07192001.asp
-        //
-
-        public CollectionUnavailableException()
-        {
-        }
-
-        public CollectionUnavailableException(string message) : base(message)
-        {
-        }
-
-        public CollectionUnavailableException(string message, Exception inner) : base(message, inner)
-        {
-        }
-
-        protected CollectionUnavailableException(
-            SerializationInfo info,
-            StreamingContext context) : base(info, context)
-        {
         }
     }
 

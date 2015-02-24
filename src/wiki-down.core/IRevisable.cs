@@ -10,6 +10,6 @@ namespace wiki_down.core
 
         DateTime RevisedOn { get; }
 
-        bool IsAllowedChildren { get; set; }
+
     }
 }
