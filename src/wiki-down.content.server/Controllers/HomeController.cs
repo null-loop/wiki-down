@@ -1,7 +1,7 @@
 ﻿using System.Web.Mvc;
 using System.Web.Routing;
 
-namespace wiki_down.content.server.Controllers
+namespace wiki_down.content.server.controllers
 {
     public class HomeController : Controller
     {
@@ -10,7 +10,7 @@ namespace wiki_down.content.server.Controllers
         {
             return new TransferToRouteResult("ArticleView.GlobalId",new RouteValueDictionary()
             {
-                {"globalId","Home"}
+                {"globalId","home"}
             });
         }
     }

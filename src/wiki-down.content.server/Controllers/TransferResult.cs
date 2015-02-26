@@ -2,7 +2,7 @@
 using System.Web;
 using System.Web.Mvc;
 
-namespace wiki_down.content.server.Controllers
+namespace wiki_down.content.server.controllers
 {
     internal class TransferResult : ActionResult
     {

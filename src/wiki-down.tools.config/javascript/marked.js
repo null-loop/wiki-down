@@ -1,6 +1,11 @@
-﻿function (markdownContent) {
+﻿function(markdownContent) {
 
-    var block = {
+    if (marked!=undefined && marked.parse != undefined) {
+        if (print != undefined) print("REUSING!!");
+        return marked.parse(markdownContent);
+    }
+
+var block = {
         newline: /^\n+/,
         code: /^( {4}[^\n]+\n*)+/,
         fences: noop,

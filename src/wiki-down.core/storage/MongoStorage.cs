@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Reflection;
 using MongoDB.Driver;
+using wiki_down.core.config;
 
 namespace wiki_down.core.storage
 {
@@ -62,7 +63,7 @@ namespace wiki_down.core.storage
 
     public abstract class MongoStorage<TDefault> : MongoStorage where TDefault : IMongoData
     {
-        private string _system;
+        private static string _system;
         protected bool RequiresHistory { get; set; }
         protected bool RequiresAudit { get; set; }
 
@@ -97,8 +98,7 @@ namespace wiki_down.core.storage
 
         protected MongoStorage(string collectionNameRoot) : base(collectionNameRoot)
         {
-            var assembly = Assembly.GetEntryAssembly() ?? Assembly.GetExecutingAssembly();
-            _system = assembly.FullName;
+            _system = SystemConfigBootstrap.SystemName;
         }
 
         public MongoCursor<TDefault> Find(IMongoQuery mongoQuery)

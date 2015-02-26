@@ -4,12 +4,10 @@ using System.Linq;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using MongoDB.Driver.Builders;
+using wiki_down.core.config;
 
 namespace wiki_down.core.storage
 {
-    //TODO:Make use of services - logging
-
-
     public class MongoArticleStore : MongoStorage<MongoArticleData>, IArticleService
     {
         public MongoArticleStore() : base("articles")
@@ -39,6 +37,10 @@ namespace wiki_down.core.storage
             var drafts = GetDraftsCollection();
             drafts.CreateIndex(new IndexKeysBuilder().Ascending("GlobalId"), IndexOptions.SetUnique(false));
             drafts.CreateIndex(new IndexKeysBuilder().Ascending("Path"), IndexOptions.SetUnique(false));
+
+            var draftsHistory = GetCollection<MongoArticleData>("drafts-history");
+            draftsHistory.CreateIndex(new IndexKeysBuilder().Ascending("GlobalId"), IndexOptions.SetUnique(false));
+            draftsHistory.CreateIndex(new IndexKeysBuilder().Ascending("Path"), IndexOptions.SetUnique(false));
         }
 
         public IEnumerable<MongoArticleMetaData> SearchArticleTitlesIndex(string searchTerm, bool ignoreCase = false, int batchSize = 50)
@@ -106,17 +108,6 @@ namespace wiki_down.core.storage
             var articles = GetCollection();
 
             return articles.Find(pathQuery).Any();
-        }
-
-        public IArticleContent GetArticleContent(string path, ArticleContentFormat format, bool draft = false,
-            int revision = -1)
-        {
-            throw new NotImplementedException();
-        }
-
-        public string GetArticleContentByGlobalId(string globalId, ArticleContentFormat format)
-        {
-            throw new NotImplementedException();
         }
 
         public IArticle GetDraft(string path, string author, int revision)
@@ -198,7 +189,7 @@ namespace wiki_down.core.storage
 
                 Info("articles", "Published draft article at articlePath://" + article.Path + ", article://" + article.GlobalId + " to revision " + article.Revision);
 
-                GenerateArticleContent(article.Path);
+                GenerateArticleContent(article.Path, article.GlobalId);
             }
             else
             {
@@ -271,13 +262,14 @@ namespace wiki_down.core.storage
                 Info("articles", "Published draft article at articlePath://" + article.Path + ", article://" +
                                  article.GlobalId + " to revision " + article.Revision);
 
-                GenerateArticleContent(article.Path);
+                GenerateArticleContent(article.Path, article.GlobalId);
             }
         }
 
-        private void GenerateArticleContent(string path)
+        private void GenerateArticleContent(string path, string globalId)
         {
-            MongoGeneratedArticleContentStore.RunGenerate(path, Database);
+            MongoGeneratedArticleContentStore.RunGenerate(path, globalId, Database);
+            Debug("articles-generated", "Regenerating article content for articlePath://" + path + ", article://" + globalId);
         }
 
         private static IMongoQuery RevisedByEQ(string author)
@@ -317,12 +309,22 @@ namespace wiki_down.core.storage
             string markdown, bool isIndexed, bool isAllowedChildren, string author, string[] keywords,
             string generator = null, int revision = 1)
         {
+            Ids.ValidateGlobalId(globalId);
+            Ids.ValidatePath(path);
+
             var collection = GetDraftsCollection();
+            var draftsConfig = SystemConfiguration.GetConfiguration<IDraftArticlesConfiguration>();
 
             var articleData = CreateArticleData(globalId, parentArticlePath, path, title, markdown, isIndexed,
                 isAllowedChildren, author, keywords, generator ?? author, revision);
 
             collection.Insert(articleData);
+
+            if (draftsConfig.SaveHistory)
+            {
+                var draftsHistory = GetCollection<MongoArticleData>("drafts-history");
+                draftsHistory.Insert(History(articleData));
+            }
 
             Audit(AuditAction.Create, path, revision, author);
 
@@ -413,30 +415,35 @@ namespace wiki_down.core.storage
 
             var articleHistory = historyCollection.Find(pathQuery);
             var drafts = draftCollection.Find(pathQuery);
+            var uniqueness = GetUniqueness();
             var trashData = new MongoArticleTrashData
             {
                 ArticleHistory = new List<MongoArticleData>(articleHistory),
                 Drafts = new List<MongoArticleData>(drafts),
-                Path = path + "::" + Guid.NewGuid(),
+                Path = path + "::" + uniqueness,
                 TrashedBy = author,
                 TrashedOn = DateTime.UtcNow
             };
 
             trashCollection.Insert(trashData);
-
+             
             var lastRevision = trashData.ArticleHistory.Any() ? trashData.ArticleHistory.Max(ah => ah.Revision) : 1;
 
             collection.Remove(pathQuery);
             historyCollection.Remove(pathQuery);
             draftCollection.Remove(pathQuery);
-            generatedCollection.Remove(pathQuery);
+            generatedCollection.Remove(Query.EQ("Path", path));
             Audit(AuditAction.Delete, path, lastRevision, author);
 
             Info("articles", "Trashed article at articlePath://" + path + ", with " + trashData.ArticleHistory.Count + " revisions");
 
-            //TODO:UNIQUE the path on the trashdata.
-
             return trashData.Path;
+        }
+
+        private static string GetUniqueness()
+        {
+            //TODO:Improve this
+            return Guid.NewGuid().ToString();
         }
 
         private MongoCollection<MongoArticleTrashData> GetTrashCollection()
@@ -464,17 +471,12 @@ namespace wiki_down.core.storage
             collection.Insert(latestRevision);
             trashCollection.Remove(pathQuery);
 
-            GenerateArticleContent(path);
+            GenerateArticleContent(path, latestRevision.GlobalId);
 
             Audit(AuditAction.Recover, path, maxRevision, author);
 
             Info("articles", "Recovered article at articlePath://" + path + ", " + trashData.ArticleHistory.Count +
                              " revisions");
-        }
-
-        public string GetArticleContentByPath(string path, ArticleContentFormat format)
-        {
-            throw new NotImplementedException();
         }
 
         public IArticle ReviseDraft(string path, string title, string markdown, bool isIndexed,
@@ -486,6 +488,7 @@ namespace wiki_down.core.storage
             var pathRevisionAndAuthorQuery = Query.And(pathQuery, revisionQuery, revisedByQuery);
 
             var drafts = GetDraftsCollection();
+            var draftsConfig = SystemConfiguration.GetConfiguration<IDraftArticlesConfiguration>();
 
             var draft = drafts.Find(pathRevisionAndAuthorQuery).FirstOrDefault();
 
@@ -503,7 +506,12 @@ namespace wiki_down.core.storage
             draft.Keywords = new List<string>(keywords);
             drafts.Save(draft);
 
-            //TODO:Save draft in history if configured so (once sys config is in place)
+            if (draftsConfig.SaveHistory)
+            {
+                var draftsHistory = GetCollection<MongoArticleData>("drafts-history");
+                draftsHistory.Insert(History(draft));
+            }
+            
 
             Audit(AuditAction.Revise, path, revision, author);
 

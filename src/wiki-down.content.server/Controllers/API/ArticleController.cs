@@ -2,7 +2,7 @@
 using System.Web.Http;
 using wiki_down.core;
 
-namespace wiki_down.content.server.Controllers.API
+namespace wiki_down.content.server.controllers.API
 {
     public class ArticleController : ApiController
     {
@@ -15,6 +15,8 @@ namespace wiki_down.content.server.Controllers.API
 
         public IHttpActionResult GetByGlobalId(string globalId)
         {
+            if (!Ids.IsValidGlobalId(globalId)) return NotFound();
+
             if (_articleService.HasArticleByGlobalId(globalId))
             {
                 var article = _articleService.GetArticleByGlobalId(globalId);
@@ -37,6 +39,7 @@ namespace wiki_down.content.server.Controllers.API
 
         public IHttpActionResult GetByPath(string path)
         {
+            if (!Ids.IsValidPath(path)) return NotFound();
             throw new NotImplementedException();
         }
     }

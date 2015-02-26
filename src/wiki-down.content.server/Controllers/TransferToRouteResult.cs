@@ -2,7 +2,7 @@
 using System.Web.Mvc;
 using System.Web.Routing;
 
-namespace wiki_down.content.server.Controllers
+namespace wiki_down.content.server.controllers
 {
     public class TransferToRouteResult : ActionResult
     {

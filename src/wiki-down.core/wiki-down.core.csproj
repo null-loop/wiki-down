@@ -42,6 +42,7 @@
       <HintPath>..\packages\mongocsharpdriver.1.10.0\lib\net35\MongoDB.Driver.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -51,6 +52,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ArticleContentFormat.cs" />
+    <Compile Include="config\Class1.cs" />
     <Compile Include="IArticleService.cs" />
     <Compile Include="IExistsInArticleTree.cs" />
     <Compile Include="IArticle.cs" />

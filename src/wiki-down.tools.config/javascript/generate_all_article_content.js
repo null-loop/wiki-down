@@ -1,3 +1,3 @@
-﻿function(path) {
-    generate_article_content(path, 'Html', markdown_to_html);
+﻿function(path, globalId) {
+    generate_article_content(path, globalId, 'Html', markdown_to_html);
 }

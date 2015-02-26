@@ -108,6 +108,9 @@ namespace wiki_down.core.storage
                 cm.MapIdProperty(c => c.Id);
                 cm.MapProperty(c => c.Value).SetElementName("value");
             });
+            BsonClassMap.RegisterClassMap<MongoConfigurationArticleData>();
+            BsonClassMap.RegisterClassMap<MongoArticlesDraftsConfigurationData>();
+            BsonClassMap.RegisterClassMap<MongoSiteConfigurationData>();
 
             _connectionString = connectionString;
             _dbName = dbName;

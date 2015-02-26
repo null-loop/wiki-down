@@ -1,9 +1,7 @@
-﻿using System.Collections.Generic;
-using System.Web.Mvc;
+﻿using System.Web.Mvc;
 using wiki_down.core;
-using wiki_down.core.storage;
 
-namespace wiki_down.content.server.Controllers
+namespace wiki_down.content.server.controllers
 {
     public class EditorController : Controller
     {

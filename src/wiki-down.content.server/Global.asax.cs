@@ -4,6 +4,7 @@ using System.Configuration;
 using System.Web.Http;
 using System.Web.Mvc;
 using System.Web.Routing;
+using wiki_down.core.config;
 using wiki_down.core.storage;
 
 namespace wiki_down.content.server
@@ -13,7 +14,7 @@ namespace wiki_down.content.server
 
         protected void Application_Start(object sender, EventArgs e)
         {
-
+            SystemConfigBootstrap.Initialise();
             StructureMapConfig.Configure();
             TemplatesConfig.Configure();
             AreaRegistration.RegisterAllAreas();

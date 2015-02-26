@@ -16,10 +16,6 @@ namespace wiki_down.core
 
         void RecoverArticle(string path, string author);
 
-        string GetArticleContentByPath(string path, ArticleContentFormat format);
-
-        string GetArticleContentByGlobalId(string globalId, ArticleContentFormat format);
-
         IArticle GetDraft(string path, string author, int revision);
 
         IArticle CreateDraft(string globalId, string parentArticlePath, string path, string title,
@@ -34,8 +30,9 @@ namespace wiki_down.core
 
     public interface IGeneratedArticleContentService
     {
-        void RegenerateArticleContent(string path);
+        void RegenerateArticleContent(string path, string globalId);
 
-        IArticleContent GetGeneratedArticleCotent(string path, ArticleContentFormat format);
+        IArticleContent GetGeneratedArticleContentByPath(string path, ArticleContentFormat format);
+        IArticleContent GetGeneratedArticleContentByGlobalId(string path, ArticleContentFormat format);
     }
 }

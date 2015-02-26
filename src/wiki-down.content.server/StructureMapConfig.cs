@@ -21,7 +21,7 @@ namespace wiki_down.content.server
     {
         public void Process(Type type, Registry registry)
         {
-            if (typeof (Controller).IsAssignableFrom(type) || typeof (ApiController).IsAssignableFrom(type))
+            if ((typeof (Controller).IsAssignableFrom(type) || typeof (ApiController).IsAssignableFrom(type)) && !type.IsAbstract)
             {
                 registry.For(type).Use(type);    
             }

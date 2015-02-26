@@ -52,12 +52,14 @@ should match the real output!
 * Record article history
 * Writing to system logs
 * Writing to system audit
-* Working (but a bit hacky) MongoDB / JS markdown transformation
+* Working (if a bit hacky) MongoDB / JS markdown transformation
+* Efficient generated article content retrieval
+* Content presentation
 
 ####TODO
 
-* Investigate MongoDB / JS integration vs. NodeJS 'shards' for markdown transformation
-* Efficient generated article content retrieval
+* Basic site config
+* Basic system config
 * Editor / API integration
 * Article search and retrieval
 * Setup main website - running on latest bits
