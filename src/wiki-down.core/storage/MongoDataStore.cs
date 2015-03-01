@@ -98,6 +98,7 @@ namespace wiki_down.core.storage
                 cm.MapProperty(emd => emd.IsAllowedChildren);
                 cm.MapProperty(emd => emd.Keywords);
             });
+
             BsonClassMap.RegisterClassMap<MongoSystemLoggingEventData>(cm =>
             {
                 cm.AutoMap();
@@ -112,6 +113,7 @@ namespace wiki_down.core.storage
             BsonClassMap.RegisterClassMap<MongoArticlesDraftsConfigurationData>();
             BsonClassMap.RegisterClassMap<MongoSiteConfigurationData>();
             BsonClassMap.RegisterClassMap<MongoLoggingConfigurationData>();
+            BsonClassMap.RegisterClassMap<MongoCoreConfigurationData>();
 
             _connectionString = connectionString;
             _dbName = dbName;

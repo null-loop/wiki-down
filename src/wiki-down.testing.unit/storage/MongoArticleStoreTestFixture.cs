@@ -107,7 +107,7 @@ namespace wiki_down.testing.unit.storage
             store.Find(mongoQuery).Count().Should().Be(0);
             store.FindHistory(mongoQuery).Count().Should().Be(0);
 
-            var article = store.GetDraft(idString, "UnitTesting", 1);
+            var article = store.GetDraft(idString, "UnitTesting");
 
             article.Markdown.Should().Be(revisedContent);
             article.Revision.Should().Be(1);

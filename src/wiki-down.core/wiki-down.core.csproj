@@ -56,7 +56,7 @@
     <Compile Include="config\IDraftArticlesConfiguration.cs" />
     <Compile Include="config\ILoggingConfiguration.cs" />
     <Compile Include="config\ISiteConfiguration.cs" />
-    <Compile Include="IArticleExtendedMetaData.cs" />
+    <Compile Include="IExtendedArticleMetaData.cs" />
     <Compile Include="IArticleHistoryPage.cs" />
     <Compile Include="IArticleMetaDataService.cs" />
     <Compile Include="IArticleNavigationStructure.cs" />

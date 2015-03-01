@@ -111,12 +111,13 @@ namespace wiki_down.tools.config
                 cfg.MaximumDataStoreSize = 100000000;
             }, Environment.UserName);
 
+            MongoDataStore.SystemConfigurationStore.SetDefaultConfiguration<ICoreConfiguration>(cfg =>
+            {
+                cfg.AllowMultipleRoots = true;
+            }, Environment.UserName);
+
             MongoDataStore.SystemAuditStore.InitialiseDatabase();
             MongoDataStore.SystemLoggingStore.InitialiseDatabase();
-            
-            
-
-
 
             var javascriptStore = MongoDataStore.CreateStore<MongoJavascriptFunctionStore>();
 

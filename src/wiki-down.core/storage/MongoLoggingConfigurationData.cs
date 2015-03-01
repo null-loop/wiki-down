@@ -8,4 +8,9 @@ namespace wiki_down.core.storage
 
         public LoggingLevel MinimumLoggingLevel { get; set; }
     }
+
+    public class MongoCoreConfigurationData : MongoConfigurationArticleData, ICoreConfiguration
+    {
+        public bool AllowMultipleRoots { get; set; }
+    }
 }

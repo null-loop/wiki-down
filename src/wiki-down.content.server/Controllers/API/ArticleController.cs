@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Web.Http;
 using wiki_down.core;
 
@@ -54,19 +55,74 @@ namespace wiki_down.content.server.controllers.API
             var historyPage = _articleMetaDataService.GetHistoryPageByGlobalId(globalId, 0, DefaultPageSize);
             var metaData = _articleMetaDataService.GetCompleteMetaDataByGlobalId(globalId);
             var navigationStructure = _articleMetaDataService.GetNavigationStructureByGlobalId(globalId);
-            var statisticsData = _articleMetaDataService.GetStatisticsDataByGlobalId(globalId);
+            var statistics = _articleMetaDataService.GetStatisticsByGlobalId(globalId);
+            var activeDraft = _articleService.GetDraftMetaData("home", "anonymous");
 
-            return Ok(CreateArticleInitialMetaData(metaData, historyPage, navigationStructure, statisticsData));
+
+            return Ok(CreateArticleInitialMetaData(metaData, historyPage, navigationStructure, statistics, activeDraft));
  
         }
 
-        private ApiArticleIntialMetaData CreateArticleInitialMetaData(IArticleExtendedMetaData metaData, IArticleHistoryPage historyPage, IArticleNavigationStructure navigationStructure, IArticleStatistics statisticsData)
+        private ApiArticleIntialMetaData CreateArticleInitialMetaData(IExtendedArticleMetaData metaData, IArticleHistoryPage historyPage, IArticleNavigationStructure navigationStructure, IArticleStatistics statistics, IExtendedArticleMetaData activeDraft)
         {
             return new ApiArticleIntialMetaData()
             {
-
+                MetaData = ConvertMetaData(metaData),
+                History = ConvertHistory(historyPage),
+                Statistics = ConvertStatistics(statistics),
+                NavigationStructure = ConvertNavigationStructure(navigationStructure),
+                ActiveDraft = ConvertActiveDraft(activeDraft)
             };
         }
+
+        private ApiArticleDraftMetaData ConvertActiveDraft(IExtendedArticleMetaData activeDraft)
+        {
+            if (activeDraft != null)
+            {
+                return new ApiArticleDraftMetaData()
+                {
+                    Revision = activeDraft.Revision,
+                    RevisedOn = activeDraft.RevisedOn,
+                    RevisedBy = activeDraft.RevisedBy,
+                    HasActiveDraft = true
+                };
+            }
+            else
+            {
+                return new ApiArticleDraftMetaData()
+                {
+                    HasActiveDraft = false
+                };
+            }
+            
+        }
+
+        private ApiArticleNavigationStructure ConvertNavigationStructure(IArticleNavigationStructure navigationStructure)
+        {
+            return new ApiArticleNavigationStructure();
+        }
+
+        private ApiArticleStatistics ConvertStatistics(IArticleStatistics statistics)
+        {
+            return new ApiArticleStatistics();
+        }
+
+        private ApiArticleExtendedMetaData ConvertMetaData(IExtendedArticleMetaData metaData)
+        {
+            return new ApiArticleExtendedMetaData();
+        }
+
+        private ApiArticleHistoryMetaData ConvertHistory(IArticleHistoryPage historyPage)
+        {
+            return new ApiArticleHistoryMetaData()
+            {
+                GlobalId = historyPage.GlobalId,
+                Page = historyPage.Page,
+                PageSize = historyPage.PageSize,
+                //TODO:History entries!
+            };
+        }
+
 
         public IHttpActionResult GetHistoryByGlobalId(string globalId, int page = 0, int pageSize = DefaultPageSize)
         {
@@ -78,7 +134,40 @@ namespace wiki_down.content.server.controllers.API
         }
     }
 
+    public class ApiArticleDraftMetaData
+    {
+        public bool HasActiveDraft { get; set; }
+        public string RevisedBy { get; set; }
+        public DateTime RevisedOn { get; set; }
+        public int Revision { get; set; }
+    }
+
+    public class ApiArticleHistoryMetaData
+    {
+        public string GlobalId { get; set; }
+        public int Page { get; set; }
+        public int PageSize { get; set; }
+    }
+
     public class ApiArticleIntialMetaData
+    {
+        
+        public ApiArticleExtendedMetaData MetaData { get; set; }
+        public ApiArticleHistoryMetaData History { get; set; }
+        public ApiArticleNavigationStructure NavigationStructure { get; set; }
+        public ApiArticleStatistics Statistics { get; set; }
+        public ApiArticleDraftMetaData ActiveDraft { get; set; }
+    }
+
+    public class ApiArticleNavigationStructure
+    {
+    }
+
+    public class ApiArticleStatistics
+    {
+    }
+
+    public class ApiArticleExtendedMetaData
     {
     }
 

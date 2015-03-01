@@ -2,7 +2,7 @@ using MongoDB.Bson;
 
 namespace wiki_down.core.storage
 {
-    public class MongoArticleMetaData : IMongoData
+    public class MongoArticleMetaData : IMongoData, IArticleMetaData
     {
         public ObjectId Id { get; set; }
 

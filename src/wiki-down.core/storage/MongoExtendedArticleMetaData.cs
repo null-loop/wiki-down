@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace wiki_down.core.storage
 {
-    public class MongoExtendedArticleMetaData : MongoArticleMetaData
+    public class MongoExtendedArticleMetaData : MongoArticleMetaData, IExtendedArticleMetaData
     {
         public DateTime RevisedOn { get; set; }
 

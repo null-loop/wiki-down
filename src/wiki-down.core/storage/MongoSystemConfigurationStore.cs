@@ -22,6 +22,7 @@ namespace wiki_down.core.storage
             AddDataTypeMapping<IDraftArticlesConfiguration, MongoArticlesDraftsConfigurationData>("articles-draft");
             AddDataTypeMapping<ISiteConfiguration, MongoSiteConfigurationData>("sys-site");
             AddDataTypeMapping<ILoggingConfiguration, MongoLoggingConfigurationData>("sys-logging");
+            AddDataTypeMapping<ICoreConfiguration, MongoCoreConfigurationData>("sys-storage");
         }
 
         public static List<Type> GetInstanceTypes()

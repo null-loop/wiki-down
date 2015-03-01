@@ -16,7 +16,7 @@ namespace wiki_down.core
 
         void RecoverArticle(string path, string author);
 
-        IArticle GetDraft(string path, string author, int revision);
+        IArticle GetDraft(string path, string author);
 
         IArticle CreateDraft(string globalId, string parentArticlePath, string path, string title,
             string markdown, bool isIndexed, bool isAllowedChildren, string author, string[] keywords,
@@ -26,5 +26,7 @@ namespace wiki_down.core
 
         IArticle ReviseDraft(string path, string title, string markdown, bool isIndexed,
             bool isAllowedChildren, string[] keywords, string author, int revision);
+
+        IExtendedArticleMetaData GetDraftMetaData(string home, string author);
     }
 }

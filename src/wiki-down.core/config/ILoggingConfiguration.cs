@@ -8,4 +8,9 @@ namespace wiki_down.core.config
 
         LoggingLevel MinimumLoggingLevel { get; set; }
     }
+
+    public interface ICoreConfiguration
+    {
+        bool AllowMultipleRoots { get; set; }
+    }
 }

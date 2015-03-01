@@ -1,14 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using MongoDB.Bson;
 using MongoDB.Driver;
 using MongoDB.Driver.Builders;
 using wiki_down.core.config;
 
 namespace wiki_down.core.storage
 {
-
     public class MongoArticleStore : MongoStorage<MongoArticleData>, IArticleService
     {
         public MongoArticleStore() : base("articles")
@@ -16,6 +14,236 @@ namespace wiki_down.core.storage
             RequiresAudit = true;
             RequiresHistory = true;
             RequiresDrafts = true;
+        }
+
+        public IArticle GetArticleByGlobalId(string globalId)
+        {
+            var globalIdQuery = Query.EQ("GlobalId", globalId);
+            var articles = GetCollection();
+
+            var article = articles.Find(globalIdQuery).FirstOrDefault();
+
+            if (article == null) throw new MissingArticleException("Cannot find article at article://" + globalId);
+
+            return article;
+        }
+
+        public IArticle GetArticleByPath(string path)
+        {
+            var pathQuery = PathEQ(path);
+            var articles = GetCollection();
+
+            var article = articles.Find(pathQuery).FirstOrDefault();
+
+            if (article == null) throw new MissingArticleException("Cannot find article at articlePath://" + path);
+
+            return article;
+        }
+
+        public bool HasArticleByGlobalId(string globalId)
+        {
+            var globalIdQuery = Query.EQ("GlobalId", globalId);
+            var articles = GetCollection();
+
+            return articles.Find(globalIdQuery).Any();
+        }
+
+        public bool HasArticleByPath(string path)
+        {
+            var pathQuery = PathEQ(path);
+            var articles = GetCollection();
+
+            return articles.Find(pathQuery).Any();
+        }
+
+        public IArticle GetDraft(string path, string author)
+        {
+            var pathQuery = PathEQ(path);
+            var revisedByQuery = RevisedByEQ(author);
+            var pathRevisionAndAuthorQuery = Query.And(pathQuery, revisedByQuery);
+            var drafts = GetDraftsCollection();
+            var draft = drafts.Find(pathRevisionAndAuthorQuery).FirstOrDefault();
+            return draft;
+        }
+
+        public IArticle CreateDraft(string globalId, string parentArticlePath, string path, string title,
+            string markdown, bool isIndexed, bool isAllowedChildren, string author, string[] keywords,
+            string generator = null, int revision = 1)
+        {
+            Ids.ValidateGlobalId(globalId);
+            Ids.ValidatePath(path);
+
+            var collection = GetDraftsCollection();
+            var draftsConfig = SystemConfiguration.GetConfiguration<IDraftArticlesConfiguration>();
+
+            var article = CreateArticleData(globalId, parentArticlePath, path, title, markdown, isIndexed,
+                isAllowedChildren, author, keywords, generator ?? author, revision);
+
+            collection.Insert(article);
+
+            if (draftsConfig.SaveHistory)
+            {
+                var draftsHistory = GetCollection<MongoArticleData>("drafts-history");
+                draftsHistory.Insert(History(article));
+            }
+
+            Audit(AuditAction.Create, path, revision, author);
+
+            Info("articles", "Created draft article at articlePath://" + article.Path + ", article://" +
+                             article.GlobalId + ", revision " + revision);
+
+            return article;
+        }
+
+        public IArticle CreateDraftFromArticle(string path, string author)
+        {
+            // create a draft from an existing published article
+            var pathQuery = PathEQ(path);
+            var articles = GetCollection();
+
+            var article = articles.Find(pathQuery).FirstOrDefault();
+
+            if (article == null)
+            {
+                var message = "Cannot find article at articlePath://" + path;
+                Error("articles", message);
+                throw new MissingArticleException(message);
+            }
+            var newDraftRevision = article.Revision + 1;
+
+            return CreateDraft(article.GlobalId, article.ParentArticlePath, article.Path, article.Title,
+                article.Markdown, article.ShowInIndex, article.IsAllowedChildren, author,
+                article.Keywords.ToArray(), author, newDraftRevision);
+        }
+
+        public bool ArticleHasChildren(string path)
+        {
+            var parentPathQuery = Query.EQ("ParentArticlePath", path);
+            if (GetCollection().Find(parentPathQuery).Any())
+            {
+                return true;
+            }
+            return false;
+        }
+
+        public string TrashArticle(string path, string author)
+        {
+            // move between collections
+            var pathQuery = Query.EQ("Path", path);
+            var collection = GetCollection();
+            var trashCollection = GetTrashCollection();
+            var historyCollection = GetHistoryCollection();
+            var draftCollection = GetDraftsCollection();
+            var generatedCollection = GetCollection<MongoGeneratedArticleContentData>("generated");
+
+            // do we have children?
+            if (ArticleHasChildren(path))
+            {
+                // if so we can't delete
+                var message = "Article at articlePath://" + path + " cannot be trashed as it has child articles";
+                Error("articles", message);
+                throw new InvalidArticleStateException(message);
+            }
+
+            var articleHistory = historyCollection.Find(pathQuery);
+            var drafts = draftCollection.Find(pathQuery);
+            var uniqueness = GetUniqueness();
+            var trashData = new MongoArticleTrashData
+            {
+                ArticleHistory = new List<MongoArticleData>(articleHistory),
+                Drafts = new List<MongoArticleData>(drafts),
+                Path = path + "::" + uniqueness,
+                TrashedBy = author,
+                TrashedOn = DateTime.UtcNow
+            };
+
+            trashCollection.Insert(trashData);
+
+            var lastRevision = trashData.ArticleHistory.Any() ? trashData.ArticleHistory.Max(ah => ah.Revision) : 1;
+
+            collection.Remove(pathQuery);
+            historyCollection.Remove(pathQuery);
+            draftCollection.Remove(pathQuery);
+            generatedCollection.Remove(Query.EQ("Path", path));
+            Audit(AuditAction.Delete, path, lastRevision, author);
+
+            Info("articles", "Trashed article at articlePath://" + path + ", with " + trashData.ArticleHistory.Count + " revisions");
+
+            return trashData.Path;
+        }
+
+        public void RecoverArticle(string path, string author)
+        {
+            var pathQuery = Query.EQ("Path", path);
+
+            var collection = GetCollection();
+            var trashCollection = GetTrashCollection();
+            var historyCollection = GetHistoryCollection();
+            var draftCollection = GetDraftsCollection();
+
+            var trashData = trashCollection.FindOne(pathQuery);
+
+            historyCollection.InsertBatch(trashData.ArticleHistory);
+            draftCollection.InsertBatch(trashData.Drafts);
+
+            var maxRevision = trashData.ArticleHistory.Max(ah => ah.Revision);
+            var latestRevision = trashData.ArticleHistory.First(ah => ah.Revision == maxRevision);
+
+            collection.Insert(latestRevision);
+            trashCollection.Remove(pathQuery);
+
+            GenerateArticleContent(path, latestRevision.GlobalId);
+
+            Audit(AuditAction.Recover, path, maxRevision, author);
+
+            Info("articles", "Recovered article at articlePath://" + path + ", " + trashData.ArticleHistory.Count +
+                             " revisions");
+        }
+
+        public IArticle ReviseDraft(string path, string title, string markdown, bool isIndexed,
+            bool isAllowedChildren, string[] keywords, string author, int revision)
+        {
+            var pathQuery = Query.EQ("Path", path);
+            var revisionQuery = Query.EQ("Revision", revision);
+            var revisedByQuery = Query.EQ("RevisedBy", author);
+            var pathRevisionAndAuthorQuery = Query.And(pathQuery, revisionQuery, revisedByQuery);
+
+            var drafts = GetDraftsCollection();
+            var draftsConfig = SystemConfiguration.GetConfiguration<IDraftArticlesConfiguration>();
+
+            var draft = drafts.Find(pathRevisionAndAuthorQuery).FirstOrDefault();
+
+            if (draft == null)
+            {
+                var message = "Cannot find draft article for " + pathRevisionAndAuthorQuery;
+                Error("articles", message);
+                throw new MissingDraftException(message);
+            }
+
+            draft.Title = title;
+            draft.Markdown = markdown;
+            draft.ShowInIndex = isIndexed;
+            draft.IsAllowedChildren = isAllowedChildren;
+            draft.Keywords = new List<string>(keywords);
+            drafts.Save(draft);
+
+            if (draftsConfig.SaveHistory)
+            {
+                var draftsHistory = GetCollection<MongoArticleData>("drafts-history");
+                draftsHistory.Insert(History(draft));
+            }
+
+
+            Audit(AuditAction.Revise, path, revision, author);
+
+            Info("articles", "Revised draft article at articlePath://" + path + ", revision " + draft.Revision);
+
+            return draft;
+        }
+
+        public IExtendedArticleMetaData GetDraftMetaData(string home, string author)
+        {
+            throw new NotImplementedException();
         }
 
         public override void InitialiseDatabase()
@@ -75,70 +303,14 @@ namespace wiki_down.core.storage
             throw new Exception();
         }
 
-        public IArticle GetArticleByGlobalId(string globalId)
-        {
-            var globalIdQuery = Query.EQ("GlobalId", globalId);
-            var articles = GetCollection();
-
-            var article = articles.Find(globalIdQuery).FirstOrDefault();
-
-            if (article == null) throw new MissingArticleException("Cannot find article at article://" + globalId);
-
-            return article;
-        }
-
-        public IArticle GetArticleByPath(string path)
-        {
-            var pathQuery = PathEQ(path);
-            var articles = GetCollection();
-
-            var article = articles.Find(pathQuery).FirstOrDefault();
-
-            if (article == null) throw new MissingArticleException("Cannot find article at articlePath://" + path);
-
-            return article;
-        }
-
-
-        public bool HasArticleByGlobalId(string globalId)
-        {
-            var globalIdQuery = Query.EQ("GlobalId", globalId);
-            var articles = GetCollection();
-
-            return articles.Find(globalIdQuery).Any();
-        }
-
-        public bool HasArticleByPath(string path)
-        {
-            var pathQuery = PathEQ(path);
-            var articles = GetCollection();
-
-            return articles.Find(pathQuery).Any();
-        }
-
-        public IArticle GetDraft(string path, string author, int revision)
-        {
-            var pathQuery = PathEQ(path);
-            var revisionQuery = RevisionEQ(revision);
-            var revisedByQuery = RevisedByEQ(author);
-            var pathRevisionAndAuthorQuery = Query.And(pathQuery, revisionQuery, revisedByQuery);
-            var drafts = GetDraftsCollection();
-            var draft = drafts.Find(pathRevisionAndAuthorQuery).FirstOrDefault();
-            if (draft == null)
-            {
-                var message = "Cannot find draft article for " + pathRevisionAndAuthorQuery;
-                Error("articles", message);
-                throw new MissingDraftException(message);
-            }
-            return draft;
-        }
-
         public void PublishDraft(string path, int revision, string author, string publisher = null)
         {
             var pathQuery = PathEQ(path);
             var revisionQuery = RevisionEQ(revision);
             var revisedByQuery = RevisedByEQ(author);
             var pathRevisionAndAuthorQuery = Query.And(pathQuery, revisionQuery, revisedByQuery);
+
+            var coreConfig = SystemConfiguration.GetConfiguration<ICoreConfiguration>();
 
             var articles = GetCollection();
             var drafts = GetDraftsCollection();
@@ -207,8 +379,8 @@ namespace wiki_down.core.storage
                     throw new RevisionMismatchException(message);
                 }
 
-                /*
-                if (string.IsNullOrEmpty(draft.ParentArticlePath))
+
+                if (string.IsNullOrEmpty(draft.ParentArticlePath) && !coreConfig.AllowMultipleRoots)
                 {
                     // make sure we're the FIRST with an empty parent
                     if (articles.Find(Query.EQ("ParentArticlePath", string.Empty)).Any())
@@ -218,7 +390,7 @@ namespace wiki_down.core.storage
                         throw new InvalidArticleStateException(message);
                     }
                 }
-                */
+
 
                 // check global id and parent article path
                 var hasArticleByGlobalId = articles.Find(Query.EQ("GlobalId", draft.GlobalId)).Any();
@@ -233,15 +405,12 @@ namespace wiki_down.core.storage
 
                 if (!string.IsNullOrEmpty(draft.ParentArticlePath))
                 {
-                    var parentArticleQuery = Query.And(Query.EQ("Path", draft.ParentArticlePath),
-                        Query.EQ("IsAllowedChildren", true));
+                    var parentArticleQuery = Query.And(Query.EQ("Path", draft.ParentArticlePath), Query.EQ("IsAllowedChildren", true));
                     var hasParentArticle = articles.Find(parentArticleQuery).Any();
 
                     if (!hasParentArticle)
                     {
-                        var message = "There is no article at the articlePath://" +
-                                      draft.ParentArticlePath +
-                                      " or it is not allowed children";
+                        var message = "There is no article at the articlePath://" + draft.ParentArticlePath + " or it is not allowed children";
                         Error("articles", message);
                         throw new InvalidArticleStateException(message);
                     }
@@ -267,8 +436,7 @@ namespace wiki_down.core.storage
                 drafts.Remove(pathRevisionAndAuthorQuery);
                 Audit(AuditAction.Publish, article.Path, article.Revision, publisher ?? author);
 
-                Info("articles", "Published draft article at articlePath://" + article.Path + ", article://" +
-                                 article.GlobalId + " to revision " + article.Revision);
+                Info("articles", "Published draft article at articlePath://" + article.Path + ", article://" + article.GlobalId + " to revision " + article.Revision);
 
                 GenerateArticleContent(article.Path, article.GlobalId);
             }
@@ -313,56 +481,6 @@ namespace wiki_down.core.storage
             };
         }
 
-        public IArticle CreateDraft(string globalId, string parentArticlePath, string path, string title,
-            string markdown, bool isIndexed, bool isAllowedChildren, string author, string[] keywords,
-            string generator = null, int revision = 1)
-        {
-            Ids.ValidateGlobalId(globalId);
-            Ids.ValidatePath(path);
-
-            var collection = GetDraftsCollection();
-            var draftsConfig = SystemConfiguration.GetConfiguration<IDraftArticlesConfiguration>();
-
-            var article = CreateArticleData(globalId, parentArticlePath, path, title, markdown, isIndexed,
-                isAllowedChildren, author, keywords, generator ?? author, revision);
-
-            collection.Insert(article);
-
-            if (draftsConfig.SaveHistory)
-            {
-                var draftsHistory = GetCollection<MongoArticleData>("drafts-history");
-                draftsHistory.Insert(History(article));
-            }
-
-            Audit(AuditAction.Create, path, revision, author);
-
-            Info("articles", "Created draft article at articlePath://" + article.Path + ", article://" +
-                             article.GlobalId + ", revision " + revision);
-
-            return article;
-        }
-
-        public IArticle CreateDraftFromArticle(string path, string author)
-        {
-            // create a draft from an existing published article
-            var pathQuery = PathEQ(path);
-            var articles = GetCollection();
-
-            var article = articles.Find(pathQuery).FirstOrDefault();
-
-            if (article == null)
-            {
-                var message = "Cannot find article at articlePath://" + path;
-                Error("articles", message);
-                throw new MissingArticleException(message);
-            }
-            var newDraftRevision = article.Revision + 1;
-
-            return CreateDraft(article.GlobalId, article.ParentArticlePath, article.Path, article.Title,
-                article.Markdown, article.ShowInIndex, article.IsAllowedChildren, author,
-                article.Keywords.ToArray(), author, newDraftRevision);
-        }
-
         private static MongoArticleData CreateArticleData(string globalId, string parentArticlePath, string path,
             string title,
             string markdown, bool isIndexed, bool isAllowedChildren, string author, string[] keywords, string generator,
@@ -390,62 +508,6 @@ namespace wiki_down.core.storage
             StoreAudit("articles", action, path, actionedBy, revision);
         }
 
-        public bool ArticleHasChildren(string path)
-        {
-            var parentPathQuery = Query.EQ("ParentArticlePath", path);
-            if (GetCollection().Find(parentPathQuery).Any())
-            {
-                return true;
-            }
-            return false;
-        }
-
-        public string TrashArticle(string path, string author)
-        {
-            // move between collections
-            var pathQuery = Query.EQ("Path", path);
-            var collection = GetCollection();
-            var trashCollection = GetTrashCollection();
-            var historyCollection = GetHistoryCollection();
-            var draftCollection = GetDraftsCollection();
-            var generatedCollection = GetCollection<MongoGeneratedArticleContentData>("generated");
-
-            // do we have children?
-            if (ArticleHasChildren(path))
-            {
-                // if so we can't delete
-                var message = "Article at articlePath://" + path + " cannot be trashed as it has child articles";
-                Error("articles", message);
-                throw new InvalidArticleStateException(message);
-            }
-
-            var articleHistory = historyCollection.Find(pathQuery);
-            var drafts = draftCollection.Find(pathQuery);
-            var uniqueness = GetUniqueness();
-            var trashData = new MongoArticleTrashData
-            {
-                ArticleHistory = new List<MongoArticleData>(articleHistory),
-                Drafts = new List<MongoArticleData>(drafts),
-                Path = path + "::" + uniqueness,
-                TrashedBy = author,
-                TrashedOn = DateTime.UtcNow
-            };
-
-            trashCollection.Insert(trashData);
-             
-            var lastRevision = trashData.ArticleHistory.Any() ? trashData.ArticleHistory.Max(ah => ah.Revision) : 1;
-
-            collection.Remove(pathQuery);
-            historyCollection.Remove(pathQuery);
-            draftCollection.Remove(pathQuery);
-            generatedCollection.Remove(Query.EQ("Path", path));
-            Audit(AuditAction.Delete, path, lastRevision, author);
-
-            Info("articles", "Trashed article at articlePath://" + path + ", with " + trashData.ArticleHistory.Count + " revisions");
-
-            return trashData.Path;
-        }
-
         private static string GetUniqueness()
         {
             //TODO:Improve this
@@ -455,75 +517,6 @@ namespace wiki_down.core.storage
         private MongoCollection<MongoArticleTrashData> GetTrashCollection()
         {
             return GetCollection<MongoArticleTrashData>("trash");
-        }
-
-        public void RecoverArticle(string path, string author)
-        {
-            var pathQuery = Query.EQ("Path", path);
-
-            var collection = GetCollection();
-            var trashCollection = GetTrashCollection();
-            var historyCollection = GetHistoryCollection();
-            var draftCollection = GetDraftsCollection();
-
-            var trashData = trashCollection.FindOne(pathQuery);
-
-            historyCollection.InsertBatch(trashData.ArticleHistory);
-            draftCollection.InsertBatch(trashData.Drafts);
-
-            var maxRevision = trashData.ArticleHistory.Max(ah => ah.Revision);
-            var latestRevision = trashData.ArticleHistory.First(ah => ah.Revision == maxRevision);
-
-            collection.Insert(latestRevision);
-            trashCollection.Remove(pathQuery);
-
-            GenerateArticleContent(path, latestRevision.GlobalId);
-
-            Audit(AuditAction.Recover, path, maxRevision, author);
-
-            Info("articles", "Recovered article at articlePath://" + path + ", " + trashData.ArticleHistory.Count +
-                             " revisions");
-        }
-
-        public IArticle ReviseDraft(string path, string title, string markdown, bool isIndexed,
-            bool isAllowedChildren, string[] keywords, string author, int revision)
-        {
-            var pathQuery = Query.EQ("Path", path);
-            var revisionQuery = Query.EQ("Revision", revision);
-            var revisedByQuery = Query.EQ("RevisedBy", author);
-            var pathRevisionAndAuthorQuery = Query.And(pathQuery, revisionQuery, revisedByQuery);
-
-            var drafts = GetDraftsCollection();
-            var draftsConfig = SystemConfiguration.GetConfiguration<IDraftArticlesConfiguration>();
-
-            var draft = drafts.Find(pathRevisionAndAuthorQuery).FirstOrDefault();
-
-            if (draft == null)
-            {
-                var message = "Cannot find draft article for " + pathRevisionAndAuthorQuery;
-                Error("articles", message);
-                throw new MissingDraftException(message);
-            }
-
-            draft.Title = title;
-            draft.Markdown = markdown;
-            draft.ShowInIndex = isIndexed;
-            draft.IsAllowedChildren = isAllowedChildren;
-            draft.Keywords = new List<string>(keywords);
-            drafts.Save(draft);
-
-            if (draftsConfig.SaveHistory)
-            {
-                var draftsHistory = GetCollection<MongoArticleData>("drafts-history");
-                draftsHistory.Insert(History(draft));
-            }
-            
-
-            Audit(AuditAction.Revise, path, revision, author);
-
-            Info("articles", "Revised draft article at articlePath://" + path + ", revision " + draft.Revision);
-
-            return draft;
         }
     }
 }
