@@ -181,3 +181,11 @@ UpgradeLog*.htm
 
 # Microsoft Fakes
 FakesAssemblies/
+/src/wiki-down.content.server/js/flot/examples/
+/src/wiki-down.content.server/js/flot/API.md
+/src/wiki-down.content.server/js/flot/CONTRIBUTING.md
+/src/wiki-down.content.server/js/flot/FAQ.md
+/src/wiki-down.content.server/js/flot/Makefile
+/src/wiki-down.content.server/js/flot/NEWS.md
+/src/wiki-down.content.server/js/flot/PLUGINS.md
+/src/wiki-down.content.server/js/flot/README.md

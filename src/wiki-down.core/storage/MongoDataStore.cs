@@ -111,6 +111,7 @@ namespace wiki_down.core.storage
             BsonClassMap.RegisterClassMap<MongoConfigurationArticleData>();
             BsonClassMap.RegisterClassMap<MongoArticlesDraftsConfigurationData>();
             BsonClassMap.RegisterClassMap<MongoSiteConfigurationData>();
+            BsonClassMap.RegisterClassMap<MongoLoggingConfigurationData>();
 
             _connectionString = connectionString;
             _dbName = dbName;

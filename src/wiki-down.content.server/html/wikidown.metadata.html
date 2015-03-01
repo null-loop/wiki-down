@@ -1,0 +1,127 @@
+﻿<div class="col-lg-2">
+    <h3>Meta-Data</h3>
+    <p><strong>Global ID</strong> <code data-bind="text:globalId"/>
+    </p>
+    <p><strong>Path</strong> <code data-bind="text:path"/>
+    </p>
+    <p><strong>Created</strong> <code data-bind="text:created"/>
+    </p>
+    <p>
+        <strong>By</strong> <code data-bind="text:createdBy" />
+    </p>
+    <p>
+        <strong>Last Revised</strong> <code data-bind="text:lastRevised"/>
+    </p>
+    <p>
+        <strong>By</strong> <code data-bind="text:lastRevisedBy" />
+    </p>
+    <p>
+        <strong>Keywords</strong>
+    </p>
+    <div id="activeDraftNotification" data-bind="visible:hasActiveDraft">
+        <hr />
+        <h4>Active Draft</h4>
+        <p>
+            You have an active draft of revison <code data-bind="text:draftRevision"/> of this article, last revised on <code data-bind="text:draftRevisedOnDate"/> at <code data-bind="text:draftRevisedOnTime"/>
+        </p>
+        <div class="bs-component" style="margin-bottom: 15px;">
+            <div class="btn-group btn-group-justified">
+                <a class="btn btn-primary" id="openDraftArticleInEditor"><span class="glyphicon glyphicon-edit"></span>&nbsp;Open in editor</a>
+                <a class="btn btn-warning" id="deleteDraftRevision"><span class="glyphicon glyphicon-remove"></span>&nbsp;Delete draft</a>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="col-lg-4">
+    <h3>Article History</h3>
+    <table class="table table-striped table-hover ">
+        <thead>
+        <tr>
+            <th>R#</th>
+            <th>Date/Time</th>
+            <th>Author</th>
+            <th>Changes</th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>1</td>
+            <td>26/02/2015</td>
+            <td>Daniel Gray</td>
+            <td>n/a (article created)</td>
+            <td>
+                    <div class="btn-group btn-group-xs">
+                        <a class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                            Actions
+                            <span class="caret"></span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a href="#">View article at revision</a></li>
+                            <li><a href="#">View differences from now</a></li>
+                            <li><a href="#" class="disabled">View differences from first revision</a></li>
+                        </ul>
+                    </div>
+</td>
+        </tr>
+        <tr>
+            <td>2</td>
+            <td>28/02/2015</td>
+            <td>Daniel Gray</td>
+            <td></td>
+            <td>
+                <div class="btn-group btn-group-xs">
+                    <a class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                        Actions
+                        <span class="caret"></span>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a href="#">View article at revision</a></li>
+                        <li><a href="#">View differences from now</a></li>
+                        <li><a href="#" class="disabled">View differences from first revision</a></li>
+                    </ul>
+                </div>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    <div class="bs-component">
+        <ul class="pagination pagination-sm">
+            <li class="disabled"><a href="#">«</a></li>
+            <li class="active"><a href="#">1</a></li>
+            <li><a href="#">2</a></li>
+            <li><a href="#">3</a></li>
+            <li><a href="#">4</a></li>
+            <li><a href="#">5</a></li>
+            <li><a href="#">»</a></li>
+        </ul>
+        <div id="source-button" class="btn btn-primary btn-xs" style="display: none;">&lt; &gt;</div>
+    </div>
+</div>
+<div class="col-lg-3">
+    <h3>Navigation</h3>
+    <p><strong>Parent</strong> <code/></p>
+    <p><strong>Children</strong> <code/></p>
+    <h4>Article Links</h4>
+    <p>
+        <strong>Links from this article</strong>
+    </p>
+    <p><strong>Links to this article</strong></p>
+    <h4>External Links</h4>
+    <p><strong>Links from this article</strong>
+    </p>
+    <p><strong>Links to this article</strong></p>
+</div>
+<div class="col-lg-3">
+    <h3>Statistics</h3>
+    <h4>Content</h4>
+    <p>There are <code>125</code> characters, <code>119</code> of them content, <code>6</code> of them markdown.
+    </p>
+    <p>Together they make up <code>25</code> words (<code>12</code> of them unique) formed into <code>6</code> sentences over <code>2</code> paragraphs.
+    </p>
+    <p>The 10 most used words are - <code>cheese</code> <code>donkey</code></p>
+    <h4>Views</h4>
+    <p>This article has been read a total of <code>120</code> times</p>
+    <h4>Revisions</h4>
+    <p>The article has been revised a total of <code>2</code> times by <code>1</code> author. The person most likely to revise the article is <code>Daniel Gray</code></p>
+</div>

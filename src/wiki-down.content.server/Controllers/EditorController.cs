@@ -27,7 +27,11 @@ namespace wiki_down.content.server.controllers
         [OutputCache(Duration = 300)]
         public ActionResult StoredJavascriptFunction(string functionName)
         {
-            return JavaScript(_javascriptFunctionService.GetFunction(functionName));
+            var function = _javascriptFunctionService.GetFunction(functionName);
+
+            function = "function " + functionName + function.Substring(8);
+
+            return JavaScript(function);
         }
     }
 }

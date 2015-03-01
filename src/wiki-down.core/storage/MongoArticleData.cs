@@ -4,7 +4,7 @@ using MongoDB.Bson;
 
 namespace wiki_down.core.storage
 {
-    public class MongoArticleData : IMongoData
+    public class MongoArticleData : IMongoData, IArticle
     {
         public ObjectId Id { get; set; }
 

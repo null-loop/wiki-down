@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using MongoDB.Driver;
+using wiki_down.core.config;
 using wiki_down.core.storage;
 
 namespace wiki_down.tools.config
@@ -10,6 +12,7 @@ namespace wiki_down.tools.config
     {
         static void Main(string[] args)
         {
+            SystemConfigBootstrap.Initialise();
             if (!args.Any())
             {
                 WriteUsage();
@@ -60,6 +63,10 @@ namespace wiki_down.tools.config
                     var server = client.GetServer();
                     var database = server.GetDatabase(db);
 
+                    database.Drop();
+
+                    database = server.GetDatabase(db);
+
                     CleanDB(database);
                 }
                 InitDB();
@@ -77,9 +84,39 @@ namespace wiki_down.tools.config
 
         private static void InitDB()
         {
-            MongoDataStore.SystemAuditStore.InitialiseDatabase();
+
+            const string wikidownConfigExe = "wiki-down.config.exe";
+
             MongoDataStore.SystemConfigurationStore.InitialiseDatabase();
+
+            MongoDataStore.SystemConfigurationStore.SetDefaultConfiguration<IDraftArticlesConfiguration>(cfg =>
+            {
+                cfg.SaveHistory = false;
+            }, Environment.UserName);
+
+            MongoDataStore.SystemConfigurationStore.SetDefaultConfiguration<ISiteConfiguration>(cfg =>
+            {
+                cfg.SiteName = "Wiki Down";
+                cfg.Domains = new List<string>() { "localhost" };
+                cfg.PathMappings = new Dictionary<string, string>()
+                {
+                    {"","home"},
+                    {"examples/markdown","home.markdown-example"}
+                };
+            }, Environment.UserName);
+
+            MongoDataStore.SystemConfigurationStore.SetDefaultConfiguration<ILoggingConfiguration>(cfg =>
+            {
+                cfg.MinimumLoggingLevel = LoggingLevel.Debug;
+                cfg.MaximumDataStoreSize = 100000000;
+            }, Environment.UserName);
+
+            MongoDataStore.SystemAuditStore.InitialiseDatabase();
             MongoDataStore.SystemLoggingStore.InitialiseDatabase();
+            
+            
+
+
 
             var javascriptStore = MongoDataStore.CreateStore<MongoJavascriptFunctionStore>();
 
@@ -94,19 +131,19 @@ namespace wiki_down.tools.config
             var articleStore = MongoDataStore.CreateStore<MongoArticleStore>();
             articleStore.InitialiseDatabase();
 
-            const string wikidownConfigExe = "wiki-down.config.exe";
+            
 
-            articleStore.CreateDraft("Home", "", "Home", "Welcome to Wiki.Down", File.ReadAllText("home.txt"), true, true, Environment.UserName,new []{"Article","Content","Default"}, wikidownConfigExe);
-            articleStore.PublishDraft("Home", 1, Environment.UserName);
+            articleStore.CreateDraft("home", "", "home", "Welcome to Wiki.Down", File.ReadAllText("home.txt"), true, true, Environment.UserName,new []{"Article","Content","Default"}, wikidownConfigExe);
+            articleStore.PublishDraft("home", 1, Environment.UserName);
 
-            articleStore.CreateDraft("Markdown-Example", "Home", "Home.Markdown-Example", "A Markdown Example", File.ReadAllText("markdown-example.txt"), true, true, Environment.UserName, new[] { "Article", "Content", "Default" }, wikidownConfigExe);
-            articleStore.PublishDraft("Home.Markdown-Example", 1, Environment.UserName);
+            articleStore.CreateDraft("markdown-example", "home", "home.markdown-example", "A Markdown Example", File.ReadAllText("markdown-example.txt"), true, true, Environment.UserName, new[] { "Article", "Content", "Default" }, wikidownConfigExe);
+            articleStore.PublishDraft("home.markdown-example", 1, Environment.UserName);
 
-            articleStore.CreateDraft("Deleted", "Home", "Home.Deleted", "A Deleted Article", File.ReadAllText("deleted.txt"), true, true, Environment.UserName, new[] { "Article", "Content", "Default" }, wikidownConfigExe);
-            //articleStore.PublishDraft("Home.Deleted", 1, Environment.UserName);
-            articleStore.TrashArticle("Home.Deleted", Environment.UserName);
+            //articleStore.CreateDraft("deleted", "home", "home.deleted", "A Deleted Article", File.ReadAllText("deleted.txt"), true, true, Environment.UserName, new[] { "Article", "Content", "Default" }, wikidownConfigExe);
+            //articleStore.PublishDraft("home.deleted", 1, Environment.UserName);
+            //articleStore.TrashArticle("home.deleted", Environment.UserName);
 
-            articleStore.CreateDraft("Draft", "Home", "Home.Draft", "A Draft Article", File.ReadAllText("draft.txt"), true, true, Environment.UserName, new[] { "Article", "Content", "Default" }, wikidownConfigExe);
+            //articleStore.CreateDraft("draft", "home", "home.draft", "A Draft Article", File.ReadAllText("draft.txt"), true, true, Environment.UserName, new[] { "Article", "Content", "Default" }, wikidownConfigExe);
             
             Console.WriteLine("Created initial articles");
 

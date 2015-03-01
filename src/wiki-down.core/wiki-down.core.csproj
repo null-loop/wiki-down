@@ -52,13 +52,25 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ArticleContentFormat.cs" />
-    <Compile Include="config\Class1.cs" />
+    <Compile Include="config\SystemConfigBootstrap.cs" />
+    <Compile Include="config\IDraftArticlesConfiguration.cs" />
+    <Compile Include="config\ILoggingConfiguration.cs" />
+    <Compile Include="config\ISiteConfiguration.cs" />
+    <Compile Include="IArticleExtendedMetaData.cs" />
+    <Compile Include="IArticleHistoryPage.cs" />
+    <Compile Include="IArticleMetaDataService.cs" />
+    <Compile Include="IArticleNavigationStructure.cs" />
     <Compile Include="IArticleService.cs" />
+    <Compile Include="IArticleStatistics.cs" />
+    <Compile Include="Ids.cs" />
     <Compile Include="IExistsInArticleTree.cs" />
     <Compile Include="IArticle.cs" />
     <Compile Include="IArticleContent.cs" />
+    <Compile Include="IGeneratedArticleContentService.cs" />
     <Compile Include="IIndexable.cs" />
     <Compile Include="InvalidArticleStateException.cs" />
+    <Compile Include="InvalidGlobalIdException.cs" />
+    <Compile Include="InvalidPathException.cs" />
     <Compile Include="IRevisable.cs" />
     <Compile Include="ISystemAuditService.cs" />
     <Compile Include="ISystemConfigurationService.cs" />
@@ -75,9 +87,10 @@
     <Compile Include="storage\CollectionUnavailableException.cs" />
     <Compile Include="storage\IMongoData.cs" />
     <Compile Include="storage\LoggingLevel.cs" />
-    <Compile Include="storage\MongoArticle.cs" />
     <Compile Include="storage\MongoArticleData.cs" />
     <Compile Include="storage\MongoArticleMetaData.cs" />
+    <Compile Include="storage\MongoArticleMetaDataStore.cs" />
+    <Compile Include="storage\MongoArticlesDraftsConfigurationData.cs" />
     <Compile Include="storage\MongoArticleStore.cs" />
     <Compile Include="storage\MongoArticleTrashData.cs" />
     <Compile Include="storage\MongoConfigurationArticleData.cs" />
@@ -87,6 +100,8 @@
     <Compile Include="storage\MongoGeneratedArticleContentStore.cs" />
     <Compile Include="storage\MongoJavascriptFunctionData.cs" />
     <Compile Include="storage\MongoJavascriptFunctionStore.cs" />
+    <Compile Include="storage\MongoLoggingConfigurationData.cs" />
+    <Compile Include="storage\MongoSiteConfigurationData.cs" />
     <Compile Include="storage\MongoStorage.cs" />
     <Compile Include="storage\MongoSystemAuditEventData.cs" />
     <Compile Include="storage\MongoSystemAuditStore.cs" />

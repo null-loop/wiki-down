@@ -4,6 +4,7 @@ using System.Configuration;
 using System.Web.Http;
 using System.Web.Mvc;
 using System.Web.Routing;
+using wiki_down.content.server.controllers;
 using wiki_down.core.config;
 using wiki_down.core.storage;
 
@@ -26,8 +27,10 @@ namespace wiki_down.content.server
             FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
             RouteConfig.RegisterRoutes(RouteTable.Routes);
             StructureMapConfig.ConfigureForMvc();
+            RobotsConfig.Configure();
             MongoDataStore.Initialise(ConfigurationManager.AppSettings["wikidown.mongodb.connectionString"],
                 ConfigurationManager.AppSettings["wikidown.mongodb.dbName"]);
+
         }
 
         protected void Session_Start(object sender, EventArgs e)
@@ -58,6 +61,21 @@ namespace wiki_down.content.server
         protected void Application_End(object sender, EventArgs e)
         {
 
+        }
+    }
+
+    public static class RobotsConfig
+    {
+        public static void Configure()
+        {
+            UtilityController.ConfigureRobots(r=>
+            {
+                r.StartSection("Googlebot");
+                r.Exclude("/api");
+                
+                r.StartSection();
+                r.SiteMap("/site-map");
+            });
         }
     }
 }

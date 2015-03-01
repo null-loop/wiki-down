@@ -8,6 +8,7 @@ using wiki_down.core.config;
 
 namespace wiki_down.core.storage
 {
+
     public class MongoArticleStore : MongoStorage<MongoArticleData>, IArticleService
     {
         public MongoArticleStore() : base("articles")
@@ -69,6 +70,11 @@ namespace wiki_down.core.storage
             return Query.Matches("Title", "/" + searchTerm + "/");
         }
 
+        private IEnumerable<MongoArticleData> GetArticlesByGlobalIds(params string[] globalIds)
+        {
+            throw new Exception();
+        }
+
         public IArticle GetArticleByGlobalId(string globalId)
         {
             var globalIdQuery = Query.EQ("GlobalId", globalId);
@@ -78,7 +84,7 @@ namespace wiki_down.core.storage
 
             if (article == null) throw new MissingArticleException("Cannot find article at article://" + globalId);
 
-            return MongoArticle.Create(article);
+            return article;
         }
 
         public IArticle GetArticleByPath(string path)
@@ -90,7 +96,7 @@ namespace wiki_down.core.storage
 
             if (article == null) throw new MissingArticleException("Cannot find article at articlePath://" + path);
 
-            return MongoArticle.Create(article);
+            return article;
         }
 
 
@@ -124,7 +130,7 @@ namespace wiki_down.core.storage
                 Error("articles", message);
                 throw new MissingDraftException(message);
             }
-            return MongoArticle.Create(draft);
+            return draft;
         }
 
         public void PublishDraft(string path, int revision, string author, string publisher = null)
@@ -201,6 +207,7 @@ namespace wiki_down.core.storage
                     throw new RevisionMismatchException(message);
                 }
 
+                /*
                 if (string.IsNullOrEmpty(draft.ParentArticlePath))
                 {
                     // make sure we're the FIRST with an empty parent
@@ -211,6 +218,7 @@ namespace wiki_down.core.storage
                         throw new InvalidArticleStateException(message);
                     }
                 }
+                */
 
                 // check global id and parent article path
                 var hasArticleByGlobalId = articles.Find(Query.EQ("GlobalId", draft.GlobalId)).Any();
@@ -315,20 +323,18 @@ namespace wiki_down.core.storage
             var collection = GetDraftsCollection();
             var draftsConfig = SystemConfiguration.GetConfiguration<IDraftArticlesConfiguration>();
 
-            var articleData = CreateArticleData(globalId, parentArticlePath, path, title, markdown, isIndexed,
+            var article = CreateArticleData(globalId, parentArticlePath, path, title, markdown, isIndexed,
                 isAllowedChildren, author, keywords, generator ?? author, revision);
 
-            collection.Insert(articleData);
+            collection.Insert(article);
 
             if (draftsConfig.SaveHistory)
             {
                 var draftsHistory = GetCollection<MongoArticleData>("drafts-history");
-                draftsHistory.Insert(History(articleData));
+                draftsHistory.Insert(History(article));
             }
 
             Audit(AuditAction.Create, path, revision, author);
-
-            var article = MongoArticle.Create(articleData);
 
             Info("articles", "Created draft article at articlePath://" + article.Path + ", article://" +
                              article.GlobalId + ", revision " + revision);
@@ -517,7 +523,7 @@ namespace wiki_down.core.storage
 
             Info("articles", "Revised draft article at articlePath://" + path + ", revision " + draft.Revision);
 
-            return MongoArticle.Create(draft);
+            return draft;
         }
     }
 }

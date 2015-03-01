@@ -27,12 +27,4 @@ namespace wiki_down.core
         IArticle ReviseDraft(string path, string title, string markdown, bool isIndexed,
             bool isAllowedChildren, string[] keywords, string author, int revision);
     }
-
-    public interface IGeneratedArticleContentService
-    {
-        void RegenerateArticleContent(string path, string globalId);
-
-        IArticleContent GetGeneratedArticleContentByPath(string path, ArticleContentFormat format);
-        IArticleContent GetGeneratedArticleContentByGlobalId(string path, ArticleContentFormat format);
-    }
 }

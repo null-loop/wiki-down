@@ -53,6 +53,7 @@ namespace wiki_down.content.server
                 ce.For<IArticleService>().Use(() => MongoDataStore.CreateStore<MongoArticleStore>());
                 ce.For<IJavascriptFunctionService>().Use(() => MongoDataStore.CreateStore<MongoJavascriptFunctionStore>());
                 ce.For<IGeneratedArticleContentService>().Use(() => MongoDataStore.CreateStore<MongoGeneratedArticleContentStore>());
+                ce.For<IArticleMetaDataService>().Use(() => MongoDataStore.CreateStore<MongoArticleMetaDataStore>());
             });
         }
 

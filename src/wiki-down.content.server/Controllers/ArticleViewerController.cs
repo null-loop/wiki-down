@@ -19,7 +19,7 @@ namespace wiki_down.content.server.controllers
 
         public ActionResult ViewArticleByGlobalId(string globalId)
         {
-            if (!Ids.IsValidGlobalId(globalId)) return HttpNotFound();
+            if (!Ids.IsValidGlobalIdFormat(globalId)) return HttpNotFound();
             var articleContent = _generatedArticleContentService.GetGeneratedArticleContentByGlobalId(globalId, ArticleContentFormat.Html);
             var article = _articleService.GetArticleByGlobalId(globalId);
             return BuildResult(articleContent, article);
@@ -39,31 +39,16 @@ namespace wiki_down.content.server.controllers
                 Revision = article.Revision,
                 RevisedBy = article.RevisedBy,
                 RevisedOn = article.RevisedOn,
-                Keywords = article.Keywords
+                Keywords = article.Keywords,
             });
         }
 
         public ActionResult ViewArticleByGlobalIdWithTemplate(string globalId, string template)
         {
-            if (!Ids.IsValidGlobalId(globalId)) return HttpNotFound();
+            if (!Ids.IsValidGlobalIdFormat(globalId)) return HttpNotFound();
             var articleContent = _generatedArticleContentService.GetGeneratedArticleContentByGlobalId(globalId, ArticleContentFormat.Html);
             throw new NotImplementedException();
         }
 
-        public ActionResult ViewArticleByPath(string path)
-        {
-            path = path.Replace("_", ".");
-            if (!Ids.IsValidPath(path)) return HttpNotFound();
-            var articleContent = _generatedArticleContentService.GetGeneratedArticleContentByPath(path, ArticleContentFormat.Html);
-            var article = _articleService.GetArticleByPath(path);
-            return BuildResult(articleContent, article);
-        }
-
-        public ActionResult ViewArticleByPathWithTemplate(string path, string template)
-        {
-            if (!Ids.IsValidPath(path)) return HttpNotFound();
-            var articleContent = _generatedArticleContentService.GetGeneratedArticleContentByPath(path, ArticleContentFormat.Html);
-            throw new NotImplementedException();
-        }
     }
 }

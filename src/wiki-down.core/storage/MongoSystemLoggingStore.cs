@@ -1,6 +1,7 @@
 using System;
 using MongoDB.Driver;
 using MongoDB.Driver.Builders;
+using wiki_down.core.config;
 
 namespace wiki_down.core.storage
 {
@@ -12,10 +13,12 @@ namespace wiki_down.core.storage
 
         public override void InitialiseDatabase()
         {
-            //TODO:Get the max size from config
+            var config = SystemConfiguration.GetConfiguration<ILoggingConfiguration>();
+
+            Database.DropCollection(CollectionNameRoot);
             Database.CreateCollection(CollectionNameRoot, CollectionOptions
                 .SetCapped(true)
-                .SetMaxSize(100000000)
+                .SetMaxSize(config.MaximumDataStoreSize)
             );
         }
 

@@ -19,14 +19,10 @@ namespace wiki_down.content.server
             // editor/javascript/wikidown_markdown_to_html
             routes.MapRoute(name: "Editor.StoredJavascriptFunction", url: "editor/javascript/{functionName}", defaults: new { controller = "Editor", action = "StoredJavascriptFunction"});
 
-            // article/g/markdown-examples
-            routes.MapRoute(name: "ArticleView.GlobalId", url: "article/g/{globalId}", defaults: new { controller = "ArticleViewer", action = "ViewArticleByGlobalId" });
-            // article/p/home.markdown-examples
-            routes.MapRoute(name: "ArticleView.Path", url: "article/p/{path}", defaults: new { controller = "ArticleViewer", action = "ViewArticleByPath" });
-            // article/t/g/examples/markdown-examples
-            routes.MapRoute(name: "ArticleView.Template.GlobalId", url: "article/t/g/{template}/{globalId}", defaults: new { controller = "ArticleViewer", action = "ViewArticleByGlobalIdWithTemplate" });
-            // article/t/p/examples/markdown-examples
-            routes.MapRoute(name: "ArticleView.Template.Path", url: "article/t/p/{template}/{path}", defaults: new { controller = "ArticleViewer", action = "ViewArticleByPathWithTemplate" });
+            // article/markdown-examples
+            routes.MapRoute(name: "ArticleView.GlobalId", url: "article/{globalId}", defaults: new { controller = "ArticleViewer", action = "ViewArticleByGlobalId" });
+            // article/t/examples/markdown-examples
+            routes.MapRoute(name: "ArticleView.Template.GlobalId", url: "article/t/{template}/{globalId}", defaults: new { controller = "ArticleViewer", action = "ViewArticleByGlobalIdWithTemplate" });
 
             // sys
 
@@ -36,9 +32,12 @@ namespace wiki_down.content.server
 
             // sys/config
 
+            // home
             routes.MapRoute(name: "Home", url: "", defaults: new { controller = "Home", action = "Index" });
 
+            // robots
 
+            routes.MapRoute(name: "Robots.txt", url: "robots.txt", defaults: new {controller = "Utility", action = "Robots"});
         }
     }
 }

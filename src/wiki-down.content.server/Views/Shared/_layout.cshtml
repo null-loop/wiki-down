@@ -13,7 +13,6 @@
     
     <link rel="stylesheet" href="@Url.Content("~/css/wiki.down.css")"/>
     <link rel="stylesheet" href="@Url.Content("~/css/wiki.down.editor.css")"/>
-    <link rel="stylesheet" href="@Url.Content("~/js/highlighter/styles/default.css")"/>
 </head>
 <body>
     <div class="navbar navbar-default navbar-fixed-top">
@@ -36,32 +35,41 @@
                     <li>@Html.ActionLink("Home", "Index", "Home")</li>
                     <li>@Html.ActionLink("About", "About", "Home")</li>
                     <li>@Html.ActionLink("Editor", "Index", "Editor")</li>
-                    <li>@Html.RouteLink("Syntax", "ArticleView.GlobalId", new { globalId = "WikiDown_Syntax" }, null)</li>
-                    <li>@Html.RouteLink("System Design", "ArticleView.GlobalId", new { globalId = "WikiDown_SystemDesign" }, null)</li>
+                    <li>@Html.RouteLink("Syntax", "ArticleView.GlobalId", new {globalId = "WikiDown_Syntax"}, null)</li>
+                    <li>@Html.RouteLink("System Design", "ArticleView.GlobalId", new {globalId = "WikiDown_SystemDesign"}, null)</li>
+
+                </ul>
+                <ul class="nav navbar-nav navbar-right">
+                    <li style="padding-top: 16px;">
+                        <div class="btn-group btn-group-sm">
+                            <a href="#" id="activateReaderModeButton" class="btn btn-success disabled"><span class="glyphicon glyphicon-bookmark"></span>&nbsp;Read</a>
+                            <a href="#" id="activateMetaModeButton" class="btn btn-success"><span class="glyphicon glyphicon-tags"></span>&nbsp;Meta</a>
+                            <a href="#" id="activateEditorModeButton" class="btn btn-success"><span class="glyphicon glyphicon-edit"></span>&nbsp;Edit</a>
+                        </div>
+                    </li>
                 </ul>
             </div>
         </div>
     </div>
-    <div class="container">
-        @RenderBody()
-        <hr/>
-        <footer>
-            <div class="row">
-                <div class="col-lg-12">
-                    <img src="@Url.Content("~/images/grayholme_logo_small.png")"/>
-                    <p>&copy; @DateTime.Now.Year - Grayholme Ltd</p>
-                </div>
+<div class="container">
+    @RenderBody()
+    <hr/>
+    <footer>
+        <div class="row">
+            <div class="col-lg-12">
+                <img src="@Url.Content("~/images/grayholme_logo_small.png")"/>
+                <p>&copy; @DateTime.Now.Year - Grayholme Ltd</p>
             </div>
-        </footer>
-    </div>
+        </div>
+    </footer>
+</div>
     <script src="@Url.Content("~/js/jquery-1.11.2.min.js")"></script>
     <script src="@Url.Content("~/js/jquery-ui.min.js")"></script>
     <script src="@Url.Content("~/js/bootstrap.min.js")"></script>
     <script src="@Url.Content("~/js/knockout.js")"></script>
     <script src="@Url.Content("~/editor/javascript/markdown_to_html")"></script>
     <script src="@Url.Content("~/js/wikidown.common.js")"></script>
-    <script src="@Url.Content("~/js/markdown.editor.js")"></script>
-    <script src="@Url.Content("~/js/highlighter/highlight.pack.js")"></script>
+    <script src="@Url.Content("~/js/wikidown.article.js")"></script>
     @RenderSection("scripts", false)
 </body>
 </html>
